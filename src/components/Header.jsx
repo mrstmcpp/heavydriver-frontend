@@ -11,8 +11,8 @@ const Header = () => {
   const [menuVisible, setMenuVisible] = useState(false);
 
   return (
-    <header className="sticky top-0 z-50 bg-black bg-opacity-95 text-white shadow-md">
-      <div className="flex justify-between items-center gap-4 sm:px-6 py-3 max-w-screen-2xl mx-auto">
+    <header className="sticky top-0 z-50 bg-black/5 backdrop-blur-md text-white shadow-md">
+      <div className="max-w-6xl mx-auto px-4 flex justify-between items-center gap-4 py-3">
         {/* Logo */}
         <div className="flex-shrink-0">
           <h1

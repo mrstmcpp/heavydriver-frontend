@@ -28,11 +28,11 @@ export const getMenuItems = (navigate) => [
   {
     label: 'About',
     icon: 'pi pi-car',
-    command: () => navigate('/drivers')
+    command: () => navigate('/about')
   },
   {
     label: 'Contact',
-    icon: 'pi pi-map',
-    command: () => navigate('/live-tracking')
+    icon: 'pi pi-user',
+    command: () => navigate('/contact-us')
   }
 ];
