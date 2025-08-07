@@ -11,6 +11,9 @@ import Engineering from "./pages/Engineering";
 import FAQ from "./pages/FAQ"; 
 import NotFound from "./pages/404"; 
 import BookRide from "./core/BookRide";
+import Login from "./components/auth/Passenger/Login";
+import Register from "./components/auth/Passenger/Register";
+import Slider from "./components/slider/Slider";
 
 function App() {
   return (
@@ -23,6 +26,9 @@ function App() {
         <Route path="faq" element={<FAQ />} />
         <Route path="*" element={<NotFound />} />
         <Route path="book" element={<BookRide />} />
+        <Route path="login" element={<Login />} />
+        <Route path="register" element={<Register />} />
+        <Route path="slidertest" element={<Slider />} />
       </Route>
     </Routes>
   );

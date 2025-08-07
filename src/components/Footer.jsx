@@ -17,13 +17,13 @@ const Footer = () => {
           <h4 className="text-lg font-bold uppercase tracking-wide mb-2 border-b-2 border-yellow-400 w-max">
             Information
           </h4>
-          <p className="text-sm text-gray-300">
-            MNNIT Rider Provider is a modern ride-hailing platform designed and
-            developed by Mr Stm. Built with a scalable microservices
-            architecture, real-time location tracking, and secure communication,
-            the system aims to provide seamless transport experiences for both
-            drivers and riders. Passionate about clean code, system design, and
-            solving real-world mobility challenges.
+          <p>
+            <img src="/large_logo.png" alt="Logo" className="h-40 m-2 " />
+            <p className="text-sm text-gray-300">
+              HeavyDriver is a modern ride-hailing platform by Mr Stm,
+              built with scalable microservices, real-time tracking, and secure
+              communication—offering seamless transport for drivers and riders.
+            </p>
           </p>
         </div>
 
@@ -37,7 +37,9 @@ const Footer = () => {
               <div className="bg-yellow-400 text-black p-2 rounded-sm">
                 <i className="pi pi-map-marker text-lg" />
               </div>
-              <span>0, NBH-C, MNNIT Campus, Prayagraj, Uttar Pradesh, India</span>
+              <span>
+                0, NBH-C, MNNIT Campus, Prayagraj, Uttar Pradesh, India
+              </span>
             </div>
             <div className="flex items-start gap-3">
               <div className="bg-yellow-400 text-black p-2 rounded-sm">
@@ -82,15 +84,10 @@ const Footer = () => {
           <p className="mb-2 md:mb-0">
             © Copyright Mr Stm Inc. All rights reserved.
           </p>
-          <div className="flex gap-4">
-            <a href="#" className="hover:text-white">
-              Facebook
-            </a>
-            <a href="#" className="hover:text-white">
-              Twitter
-            </a>
-            <a href="#" className="hover:text-white">
-              LinkedIn
+          <div className="flex gap-2">
+            Made By :
+            <a href="https://github.com/mrstmcpp" className="hover:text-white">
+              Mr Stm
             </a>
           </div>
         </div>

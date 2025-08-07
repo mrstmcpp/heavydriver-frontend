@@ -1,0 +1,272 @@
+/* Main container is now full screen */
+.slider-container {
+  width: 100%;
+  height: 75vh; /* Full viewport height */
+  position: relative; /* Changed from absolute */
+  overflow: hidden;
+  background-color: #140534; /* Fallback color */
+}
+
+.directional {
+  /* This container now spans the whole screen to position the buttons */
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  
+  /* Use flexbox to position the buttons */
+  display: flex;
+  justify-content: space-between; /* Pushes buttons to the edges */
+  align-items: center;      /* Vertically centers them */
+  
+  padding: 0 2rem; /* Adds some space from the screen edges, e.g., 32px */
+  
+  z-index: 100;
+  
+  /* IMPORTANT: Allows clicks to pass through the container to the content behind it */
+  pointer-events: none; 
+}
+
+.directional button {
+  width: 50px;
+  height: 50px;
+  font-size: 1.5rem;
+  color: #fff;
+  background-color: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  cursor: pointer;
+  opacity: 0.7;
+  transition: opacity 0.3s ease, background-color 0.3s ease;
+  
+  /* IMPORTANT: Makes the buttons clickable again, overriding the container's setting */
+  pointer-events: auto; 
+}
+
+.directional button:hover {
+  opacity: 1;
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+#slide {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+/* Item now acts as the full background slide */
+#slide .item {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  transition: transform 0.8s ease-in-out, opacity 0.8s ease-in-out;
+  z-index: 1;
+}
+
+/* IMPROVEMENT: Dark overlay for text readability */
+.content-overlay {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.7), transparent 50%);
+  display: flex;
+  align-items: center; /* Vertically center content */
+  justify-content: center; /* Horizontally center content */
+}
+
+.content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  max-width: 1200px; /* Max width for content */
+  padding: 0 50px; /* Padding on sides */
+  color: #fff;
+  opacity: 0; /* Hidden by default, animated in */
+}
+
+.content .left {
+  max-width: 50%;
+}
+.content .right {
+  background-color: rgba(0, 0, 0, 0.2);
+  padding: 2rem;
+  border-radius: 10px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.content .title {
+  font-size: 4rem; /* 64px */
+  font-weight: 700;
+  line-height: 1.1;
+  margin-bottom: 1rem;
+  text-shadow: 2px 2px 8px rgba(0,0,0,0.5);
+}
+
+.content .des {
+  font-size: 1.125rem; /* 18px */
+  font-weight: 300;
+  opacity: 0.9;
+  margin-bottom: 1.5rem;
+  line-height: 1.6;
+}
+
+.content button {
+  font-size: 1rem;
+  background-color: transparent;
+  border: 2px solid white;
+  color: #fff;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.content button:hover {
+  background-color: white;
+  color: black;
+}
+
+.content .right h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+  padding-bottom: 0.5rem;
+}
+
+.content .right ul {
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+.content .right li {
+  margin-top: 1.25rem;
+}
+.content .right li p:nth-child(1) {
+  font-weight: 500;
+  margin: 0;
+}
+.content .right li p:nth-child(2) {
+  font-weight: 300;
+  margin: 0;
+  font-size: 0.9rem;
+  opacity: 0.8;
+}
+
+/* --- Animation Logic --- */
+#slide .item:nth-child(2) {
+  z-index: 2; /* Active slide is on top */
+}
+
+#slide .item:last-child {
+  transform: translateX(-100%);
+  opacity: 0;
+}
+
+#slide .item:first-child {
+  transform: translateX(100%);
+  opacity: 0;
+}
+
+@keyframes contentIn {
+  from {
+    opacity: 0;
+    transform: translateY(50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes contentOut {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-50px);
+  }
+}
+
+#slide .item:last-child .content {
+  animation: contentOut 1.5s ease-in-out forwards;
+}
+
+#slide .item:nth-child(2) .content {
+  opacity: 1; /* Make it visible */
+  animation: contentIn 1.5s ease-in-out forwards;
+}
+
+
+/*
+==================================================================
+  RESPONSIVE FIX FOR SMALL SCREENS (MOBILE VIEW)
+==================================================================
+*/
+@media (max-width: 768px) {
+  /*
+    On smaller screens, we change the flex direction to 'column'
+    so the left and right content sections stack on top of each other
+    instead of overlapping.
+  */
+  .content {
+    flex-direction: column;
+    justify-content: center; /* Center the stacked content vertically */
+    padding: 0 30px;         /* Adjust padding for smaller screens */
+  }
+
+  /*
+    Allow the left container (title/description) to use the full width
+    and add some space below it.
+  */
+  .content .left {
+    max-width: 100%;
+    text-align: center;      /* Center-align the text for a better mobile look */
+    margin-bottom: 2.5rem;   /* Add space between the two sections */
+  }
+
+  /*
+    Ensure the right container (Ride Info) also uses the full width.
+  */
+  .content .right {
+    width: 100%;
+    max-width: 450px; /* Optional: Constrain the width of the info box */
+  }
+
+  /*
+    Reduce the main title's font size to prevent it from being too large.
+  */
+  .content .title {
+    font-size: 3rem; /* Reduced from 4rem */
+  }
+
+  /*
+    Slightly reduce description font size for better balance.
+  */
+  .content .des {
+    font-sze: 1rem; /* Reduced from 1.125rem */
+  }
+
+  /* The directional buttons might be too large for mobile.
+    Let's make them slightly smaller.
+  */
+  .directional button {
+    width: 40px;
+    height: 40px;
+    font-size: 1.2rem;
+  }
+
+  /* Adjust padding on the main directional container */
+  .directional {
+    padding: 0 1rem;
+  }
+}

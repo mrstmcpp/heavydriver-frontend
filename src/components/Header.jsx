@@ -19,7 +19,7 @@ const Header = () => {
             className="text-2xl font-bold text-yellow-400 cursor-pointer"
             onClick={() => navigate("/")}
           >
-            HeavyDriver
+            <img src="/banner_logo_trans.png" alt="HeavyDriver Logo" className="h-12" />
           </h1>
         </div>
 
