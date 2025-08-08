@@ -2,8 +2,7 @@ import Header from "../components/Header";
 import { Outlet } from "react-router-dom";
 import Footer from "../components/Footer";
 import { ScrollTop } from "primereact/scrolltop";
-import Features from "../components/homepage/Features";
-import WhyUs from "../components/homepage/WhyUs";
+
 
 const Layout = () => {
   return (

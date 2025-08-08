@@ -6,6 +6,7 @@ const CustomInput = ({
   id,
   type = "text",
   label,
+  placeholder,
   icon,
   value,
   onChange,
@@ -26,12 +27,19 @@ const CustomInput = ({
             feedback={false}
             inputId={id}
             className="w-full"
-            inputClassName={`${baseStyle} ${className} !pr-10`} // Ensures room for mask icon
+            inputClassName={`${baseStyle} ${className} !pr-10`}
             pt={{
               root: { className: "w-full" },
-              input: { className: "!text-sm !leading-none !p-0 !px-3 !py-3" },
-              toggleMask: { className: "!text-gray-400 right-3 top-1/2 -translate-y-1/2" },
+              input: {
+                className:
+                  "!text-sm !leading-none !p-0 !px-3 !py-3",
+              },
+              toggleMask: {
+                className:
+                  "!text-gray-400 right-3 top-1/2 -translate-y-1/2",
+              },
             }}
+            placeholder={placeholder}
           />
         ) : (
           <input
@@ -40,6 +48,7 @@ const CustomInput = ({
             value={value}
             onChange={onChange}
             className={`${baseStyle} ${className}`}
+            placeholder={placeholder}
           />
         )}
 

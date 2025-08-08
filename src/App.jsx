@@ -15,6 +15,7 @@ import Login from "./components/auth/Passenger/Login";
 import Register from "./components/auth/Passenger/Register";
 import Slider from "./components/slider/Slider";
 import ScrollToTop from "./resusables/ScrollToTop";
+import MeetTheManBehind from "./pages/MeetTheManBehind";
 
 function App() {
   return (
@@ -32,6 +33,7 @@ function App() {
           <Route path="login" element={<Login />} />
           <Route path="register" element={<Register />} />
           <Route path="slidertest" element={<Slider />} />
+          <Route path="meet-the-man-behind" element={<MeetTheManBehind />} />
         </Route>
       </Routes>
     </>
