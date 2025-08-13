@@ -35,7 +35,7 @@ const BookRide = () => {
           </div>
 
           {/* Ride Type Toggle */}
-          <div>
+          {/* <div>
             <label className="block text-sm text-gray-400">Ride Type</label>
             <div className="flex border border-gray-700 rounded overflow-hidden">
               <button
@@ -59,7 +59,7 @@ const BookRide = () => {
                 Family
               </button>
             </div>
-          </div>
+          </div> */}
 
           {/* Name & Email */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

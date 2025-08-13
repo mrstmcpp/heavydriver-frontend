@@ -17,14 +17,14 @@ const Footer = () => {
           <h4 className="text-lg font-bold uppercase tracking-wide mb-2 border-b-2 border-yellow-400 w-max">
             Information
           </h4>
-          <p>
+
             <img src="/large_logo.png" alt="Logo" className="h-40 m-2 " />
-            <p className="text-sm text-gray-300">
+            <div className="text-sm text-gray-300">
               HeavyDriver is a modern ride-hailing platform by Mr Stm,
               built with scalable microservices, real-time tracking, and secure
               communication—offering seamless transport for drivers and riders.
-            </p>
-          </p>
+            </div>
+
         </div>
 
         {/* Contact Info */}

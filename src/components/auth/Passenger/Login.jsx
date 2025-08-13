@@ -1,15 +1,28 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import CustomInput from "../../../resusables/CustomInput";
 import YellowButton from "../../../resusables/YellowButton";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
 
-  const handleLogin = () => {
-    console.log("Logging in:", { email, password });
+  // Configure axios globally to send cookies
+  axios.defaults.withCredentials = true;
+
+  const handleLogin = async () => {
+    try {
+      await axios.post(
+        `${import.meta.env.VITE_AUTH_BACKEND_URL}/auth/signin/passenger`,
+        { email, password }
+      );
+      console.log("Login successful");
+      navigate("/"); // Redirect after successful login
+    } catch (error) {
+      console.error("Login failed:", error);
+    }
   };
 
   return (

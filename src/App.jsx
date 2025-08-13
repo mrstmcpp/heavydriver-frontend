@@ -1,4 +1,6 @@
 import { Routes, Route } from "react-router-dom";
+import React, { useEffect } from "react";
+import axios from "axios";
 import HomePage from "./pages/Homepage";
 import Layout from "./layout/Layout";
 import "./App.css";
@@ -16,8 +18,17 @@ import Register from "./components/auth/Passenger/Register";
 import Slider from "./components/slider/Slider";
 import ScrollToTop from "./resusables/ScrollToTop";
 import MeetTheManBehind from "./pages/MeetTheManBehind";
+import useAuthStore from "./hooks/useAuthStore";
+import PublicRoute from "./components/PublicRoutes";
 
+axios.defaults.withCredentials = true;
 function App() {
+  const { checkAuth } = useAuthStore();
+
+  useEffect(() => {
+    checkAuth();
+  }, [checkAuth]);
+
   return (
     <>
       <ScrollToTop />
@@ -30,10 +41,27 @@ function App() {
           <Route path="faq" element={<FAQ />} />
           <Route path="*" element={<NotFound />} />
           <Route path="book" element={<BookRide />} />
-          <Route path="login" element={<Login />} />
-          <Route path="register" element={<Register />} />
           <Route path="slidertest" element={<Slider />} />
           <Route path="meet-the-man-behind" element={<MeetTheManBehind />} />
+
+          {/* public routes starts from here */}
+          <Route
+            path="login"
+            element={
+              <PublicRoute>
+                <Login />
+              </PublicRoute>
+            }
+          />
+
+          <Route
+            path="register"
+            element={
+              <PublicRoute>
+                <Register />
+              </PublicRoute>
+            }
+          />
         </Route>
       </Routes>
     </>
