@@ -2,9 +2,28 @@ import React, { useState } from "react";
 import { PageTopBanner } from "../components/PageTopBanner";
 import YellowButton from "../resusables/YellowButton";
 import CustomInput from "../resusables/CustomInput";
-
+import MapComponent from "../components/maps/MapComponent";
+import { Dialog } from "primereact/dialog";
 const BookRide = () => {
-  const [rideType, setRideType] = useState("single");
+  const [startLocation, setStartLocation] = useState("");
+  const [endLocation, setEndLocation] = useState("");
+  const [mapVisible, setMapVisible] = useState(false);
+  const [activeField, setActiveField] = useState(null); // "start" | "end"
+
+  const handleLocationSelect = (coords) => {
+    const formatted = `${coords.lat.toFixed(5)}, ${coords.lng.toFixed(5)}`;
+    if (activeField === "start") {
+      setStartLocation(formatted);
+    } else if (activeField === "end") {
+      setEndLocation(formatted);
+    }
+    setMapVisible(false); // close dialog
+  };
+
+  const openMapFor = (field) => {
+    setActiveField(field);
+    setMapVisible(true);
+  };
 
   return (
     <div className="bg-black min-h-screen text-white">
@@ -17,7 +36,7 @@ const BookRide = () => {
         </p>
 
         <div className="space-y-8">
-          {/* Taxi Type Dropdown */}
+          {/* Taxi Type */}
           <div>
             <label className="block text-sm mb-1 text-gray-400">Taxi Type</label>
             <select className="w-full bg-[#1a1a1a] text-white border border-gray-700 rounded px-4 py-3 focus:outline-none hover:border-yellow-400 transition">
@@ -28,38 +47,25 @@ const BookRide = () => {
             </select>
           </div>
 
-          {/* Start and End Destination */}
+          {/* Start & End Location */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <CustomInput label="Start Location" icon="pi pi-map-marker" />
-            <CustomInput label="End Location" icon="pi pi-map-marker" />
-          </div>
-
-          {/* Ride Type Toggle */}
-          {/* <div>
-            <label className="block text-sm text-gray-400">Ride Type</label>
-            <div className="flex border border-gray-700 rounded overflow-hidden">
-              <button
-                onClick={() => setRideType("single")}
-                className={`w-1/2 py-3 font-semibold transition duration-200 ${
-                  rideType === "single"
-                    ? "bg-yellow-400 text-black"
-                    : "bg-[#1a1a1a] text-white hover:bg-gray-800"
-                }`}
-              >
-                Single
-              </button>
-              <button
-                onClick={() => setRideType("family")}
-                className={`w-1/2 py-3 font-semibold transition duration-200 ${
-                  rideType === "family"
-                    ? "bg-yellow-400 text-black"
-                    : "bg-[#1a1a1a] text-white hover:bg-gray-800"
-                }`}
-              >
-                Family
-              </button>
+            <div onClick={() => openMapFor("start")} className="cursor-pointer">
+              <CustomInput
+                label="Start Location"
+                icon="pi pi-map-marker"
+                value={startLocation}
+                readOnly
+              />
             </div>
-          </div> */}
+            <div onClick={() => openMapFor("end")} className="cursor-pointer">
+              <CustomInput
+                label="End Location"
+                icon="pi pi-map-marker"
+                value={endLocation}
+                readOnly
+              />
+            </div>
+          </div>
 
           {/* Name & Email */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -70,7 +76,7 @@ const BookRide = () => {
           {/* Phone */}
           <CustomInput label="Phone Number" icon="pi pi-phone" />
 
-          {/* Submit Button */}
+          {/* Button */}
           <div className="pt-2">
             <YellowButton onClick={() => console.log("Taxi booking submitted!")}>
               Find a Taxi
@@ -78,6 +84,22 @@ const BookRide = () => {
           </div>
         </div>
       </div>
+
+      {/* Map Dialog */}
+      <Dialog
+        header={`Select ${activeField === "start" ? "Start" : "End"} Location`}
+        visible={mapVisible}
+        maximizable
+        style={{ width: "80vw" }}
+        onHide={() => setMapVisible(false)}
+      >
+        <MapComponent
+          center={{ lat: 25.492683, lng: 81.8642 }}
+          zoom={14}
+          height="500px"
+          onLocationSelect={handleLocationSelect}
+        />
+      </Dialog>
     </div>
   );
 };

@@ -20,6 +20,9 @@ import ScrollToTop from "./resusables/ScrollToTop";
 import MeetTheManBehind from "./pages/MeetTheManBehind";
 import useAuthStore from "./hooks/useAuthStore";
 import PublicRoute from "./components/PublicRoutes";
+import ProtectedRoutes from "./components/ProtectedRoutes";
+import MapComponent from "./components/maps/MapComponent";
+
 
 axios.defaults.withCredentials = true;
 function App() {
@@ -40,9 +43,16 @@ function App() {
           <Route path="engineering" element={<Engineering />} />
           <Route path="faq" element={<FAQ />} />
           <Route path="*" element={<NotFound />} />
-          <Route path="book" element={<BookRide />} />
           <Route path="slidertest" element={<Slider />} />
+          <Route path="maps" element={<MapComponent />} />
           <Route path="meet-the-man-behind" element={<MeetTheManBehind />} />
+
+          {/* protected routes start from here */}
+          <Route path="book" element={
+            <ProtectedRoutes>
+              <BookRide />
+            </ProtectedRoutes>
+          } />
 
           {/* public routes starts from here */}
           <Route

@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { Navigate } from "react-router-dom";
 import useAuthStore from "../hooks/useAuthStore";
+import CarLoader from "../resusables/CarLoader";
 
 export default function ProtectedRoutes({ children }) {
     const { authUser, loading, checkAuth } = useAuthStore();
@@ -10,7 +11,7 @@ export default function ProtectedRoutes({ children }) {
     }, [checkAuth]);
 
     if (loading) {
-        return <div>Verifying authentication details. Please wait...</div>;
+        return <CarLoader message="Loading authentication status..."/>;
     }
 
     // If no user is logged in send to login

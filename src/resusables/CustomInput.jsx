@@ -6,11 +6,11 @@ const CustomInput = ({
   id,
   type = "text",
   label,
-  placeholder,
   icon,
   value,
   onChange,
   className = "",
+  readOnly = false,
 }) => {
   const baseStyle =
     "bg-[#1a1a1a] text-white text-sm border border-gray-700 rounded-md px-3 py-3 pr-10 w-full";
@@ -39,7 +39,7 @@ const CustomInput = ({
                   "!text-gray-400 right-3 top-1/2 -translate-y-1/2",
               },
             }}
-            placeholder={placeholder}
+            placeholder=" "
           />
         ) : (
           <input
@@ -48,7 +48,8 @@ const CustomInput = ({
             value={value}
             onChange={onChange}
             className={`${baseStyle} ${className}`}
-            placeholder={placeholder}
+            placeholder=" " // space so FloatLabel works
+            readOnly={readOnly}
           />
         )}
 
