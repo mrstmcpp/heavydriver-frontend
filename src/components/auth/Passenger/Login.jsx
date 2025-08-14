@@ -1,16 +1,17 @@
-import { useState, useEffect } from "react";
+import { useState , useRef } from "react";
 import CustomInput from "../../../resusables/CustomInput";
 import YellowButton from "../../../resusables/YellowButton";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { Toast } from 'primereact/toast';
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
+  const toast = useRef(null);
 
   // Configure axios globally to send cookies
-  axios.defaults.withCredentials = true;
 
   const handleLogin = async () => {
     try {
@@ -18,10 +19,11 @@ const Login = () => {
         `${import.meta.env.VITE_AUTH_BACKEND_URL}/auth/signin/passenger`,
         { email, password }
       );
-      console.log("Login successful");
-      navigate("/"); // Redirect after successful login
+      toast.current.show({severity:'success', summary: 'Success', detail:'Login successful', life: 3000});
+      navigate("/");
     } catch (error) {
       console.error("Login failed:", error);
+      toast.current.show({severity:'error', summary: 'Error', detail:'Login failed', life: 3000});
     }
   };
 
@@ -31,7 +33,7 @@ const Login = () => {
         <h2 className="text-3xl font-bold text-yellow-400 mb-6 text-center">
           Login
         </h2>
-
+        <Toast ref={toast} />
         <div className="space-y-5">
           <CustomInput
             label="Email"

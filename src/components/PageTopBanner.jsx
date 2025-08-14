@@ -3,7 +3,7 @@ import Image from "../assets/page2.jpg";
 
 export const PageTopBanner = ({ section }) => {
   return (
-    <div className="relative w-full h-60 sm:h-80 lg:h-[400px] overflow-hidden">
+    <div className="relative w-full h-60 sm:h-80 lg:h-[300px] overflow-hidden">
       {/* Blurred background image */}
       <img
         src={Image}

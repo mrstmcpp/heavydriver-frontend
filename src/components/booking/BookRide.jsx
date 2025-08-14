@@ -1,18 +1,23 @@
 import React, { useState, useMemo } from "react";
-import { PageTopBanner } from "../components/PageTopBanner";
-import YellowButton from "../resusables/YellowButton";
-import CustomInput from "../resusables/CustomInput";
-import MapComponent from "../components/maps/MapComponent";
+import { PageTopBanner } from "../PageTopBanner";
+import YellowButton from "../../resusables/YellowButton";
+import CustomInput from "../../resusables/CustomInput";
+import MapComponent from "../maps/MapComponent";
 import { Dialog } from "primereact/dialog";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 const BookRide = () => {
   const [startLocation, setStartLocation] = useState("");
   const [endLocation, setEndLocation] = useState("");
   const [mapVisible, setMapVisible] = useState(false);
   const [activeField, setActiveField] = useState(null);
-
   const [distance, setDistance] = useState(null);
   const [duration, setDuration] = useState(null);
+  const navigate = useNavigate();
+
+  // Default center for the map
+
 
   const mapCenter = useMemo(() => ({ lat: 26.8467, lng: 80.9462 }), []);
 
@@ -25,7 +30,7 @@ const BookRide = () => {
     }
     setMapVisible(false);
   };
-  
+
   const handleRouteCalculated = (results) => {
     if (results) {
       setDistance(results.distance);
@@ -38,19 +43,60 @@ const BookRide = () => {
     setMapVisible(true);
   };
 
+  // ${import.meta.env.VITE_BOOKING_BACKEND_URL}/api/v1/booking
+
+  const handleBooking = async () => {
+    if (!startLocation || !endLocation) {
+      alert("Please fill all fields before booking.");
+      return;
+    }
+
+    const [startLat, startLng] = startLocation.split(",").map(Number);
+    const [endLat, endLng] = endLocation.split(",").map(Number);
+
+    try {
+      const passengerId = 1;
+
+      await axios.post(
+        `${import.meta.env.VITE_BOOKING_BACKEND_URL}/booking`,
+        {
+          passengerId,
+          startLocation: {
+            latitude: startLat,
+            longitude: startLng,
+          },
+          endLocation: {
+            latitude: endLat,
+            longitude: endLng,
+          },
+        },
+        { withCredentials: true }
+      );
+
+      navigate(`/driver-finding?startLat=${startLat}&startLng=${startLng}`);
+    } catch (error) {
+      console.error("Booking failed:", error);
+      alert("Booking failed, please try again.");
+    }
+  };
+
   return (
     <div className="bg-black min-h-screen text-white">
       <PageTopBanner section="Book a Ride" />
 
       <div className="max-w-3xl mx-auto bg-[#0f0f0f] p-8 rounded-2xl shadow-lg mt-10 mb-10 border border-gray-800">
-        <h2 className="text-4xl font-bold mb-2 text-yellow-400">Book Your Taxi Ride!</h2>
+        <h2 className="text-4xl font-bold mb-2 text-yellow-400">
+          Book Your Taxi Ride!
+        </h2>
         <p className="text-gray-400 mb-8">
           Choose your preferences and we'll find you the best ride.
         </p>
 
         <div className="space-y-8">
           <div>
-            <label className="block text-sm mb-1 text-gray-400">Taxi Type</label>
+            <label className="block text-sm mb-1 text-gray-400">
+              Taxi Type
+            </label>
             <select className="w-full bg-[#1a1a1a] text-white border border-gray-700 rounded px-4 py-3 focus:outline-none hover:border-yellow-400 transition">
               <option value="">Choose Taxi Type</option>
               <option value="mini">Mini</option>
@@ -78,7 +124,6 @@ const BookRide = () => {
             </div>
           </div>
 
-
           {startLocation && endLocation && (
             <div className="space-y-4">
               <h3 className="text-2xl font-semibold text-yellow-400 border-b border-gray-700 pb-2">
@@ -91,7 +136,7 @@ const BookRide = () => {
                   onRouteCalculated={handleRouteCalculated}
                   center={mapCenter}
                   showDirectionsUI={false}
-                  isInteractive={false} 
+                  isInteractive={false}
                   height="100%"
                 />
               </div>
@@ -112,9 +157,7 @@ const BookRide = () => {
           )}
 
           <div className="pt-2">
-            <YellowButton onClick={() => console.log("Taxi booking submitted!")}>
-              Get Nearby Drivers
-            </YellowButton>
+            <YellowButton onClick={handleBooking}>Create Booking</YellowButton>
           </div>
         </div>
       </div>

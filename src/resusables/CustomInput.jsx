@@ -26,7 +26,6 @@ const CustomInput = ({
             toggleMask
             feedback={false}
             inputId={id}
-            className="w-full"
             inputClassName={`${baseStyle} ${className} !pr-10`}
             pt={{
               root: { className: "w-full" },

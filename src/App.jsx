@@ -12,7 +12,7 @@ import Contact from "./pages/Contact";
 import Engineering from "./pages/Engineering";
 import FAQ from "./pages/FAQ";
 import NotFound from "./pages/404";
-import BookRide from "./core/BookRide";
+import BookRide from "./components/booking/BookRide";
 import Login from "./components/auth/Passenger/Login";
 import Register from "./components/auth/Passenger/Register";
 import Slider from "./components/slider/Slider";
@@ -22,7 +22,7 @@ import useAuthStore from "./hooks/useAuthStore";
 import PublicRoute from "./components/PublicRoutes";
 import ProtectedRoutes from "./components/ProtectedRoutes";
 import MapComponent from "./components/maps/MapComponent";
-
+import DriverFinding from "./components/booking/DriverFinding";
 
 axios.defaults.withCredentials = true;
 function App() {
@@ -46,6 +46,7 @@ function App() {
           <Route path="slidertest" element={<Slider />} />
           <Route path="maps" element={<MapComponent />} />
           <Route path="meet-the-man-behind" element={<MeetTheManBehind />} />
+          <Route path="driver-finding" element={<DriverFinding />} />
 
           {/* protected routes start from here */}
           <Route path="book" element={
@@ -53,7 +54,7 @@ function App() {
               <BookRide />
             </ProtectedRoutes>
           } />
-
+      
           {/* public routes starts from here */}
           <Route
             path="login"
