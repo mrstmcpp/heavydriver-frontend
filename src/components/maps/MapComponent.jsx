@@ -1,55 +1,127 @@
-import React, { useRef, useState, useCallback } from "react";
-import { GoogleMap, useJsApiLoader } from "@react-google-maps/api";
+import React, { useRef, useState, useCallback, useEffect } from "react";
+import { GoogleMap, useJsApiLoader, Marker, DirectionsRenderer } from "@react-google-maps/api";
+import CurrentLocationButton from "./CurrentLocationButton";
 
-const libraries = ["marker"];
+const containerStyle = { width: "100%", height: "100%", borderRadius: '0.5rem' };
+const mapOptions = {
+  zoomControl: true,
+  streetViewControl: false,
+  mapTypeControl: false,
+  fullscreenControl: false,
+};
 
-const MapComponent = ({ center, zoom = 12, height = "400px", onLocationSelect }) => {
-  const { isLoaded } = useJsApiLoader({
+const MapComponent = ({
+  center,
+  zoom = 12,
+  height = "400px",
+  onLocationSelect,
+  showDirectionsUI = true,
+  origin,
+  destination,
+  onRouteCalculated,
+  isInteractive = true,
+}) => {
+  const { isLoaded, loadError } = useJsApiLoader({
     id: "google-map-script",
     googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
-    libraries,
   });
 
   const [map, setMap] = useState(null);
-  const markerRef = useRef(null);
+  const [markerPosition, setMarkerPosition] = useState(null);
+  const [directionResponse, setDirectionResponse] = useState(null);
 
-  const onLoad = useCallback((mapInstance) => {
-    setMap(mapInstance);
-  }, []);
+  const calculateRoute = useCallback(async (originVal, destinationVal) => {
+    if (!originVal || !destinationVal) return;
 
-  const onUnmount = useCallback(() => {
-    setMap(null);
-    markerRef.current = null;
-  }, []);
+    const directionService = new window.google.maps.DirectionsService();
+    try {
+      const results = await directionService.route({
+        origin: originVal,
+        destination: destinationVal,
+        travelMode: window.google.maps.TravelMode.DRIVING,
+      });
 
-  const handleClick = (e) => {
-    const latLng = { lat: e.latLng.lat(), lng: e.latLng.lng() };
+      setDirectionResponse(results);
+      setMarkerPosition(null); // Clear single marker when route is shown
+      const leg = results.routes[0].legs[0];
+      
+      if (onRouteCalculated) {
+        onRouteCalculated({
+          distance: leg.distance.text,
+          duration: leg.duration.text,
+        });
+      }
 
-    // Remove old marker
-    if (markerRef.current) markerRef.current.map = null;
+    } catch (error) {
+      console.error("Error calculating route:", error);
+      setDirectionResponse(null);
+      if(onRouteCalculated) onRouteCalculated({ distance: null, duration: null });
+    }
+  }, [onRouteCalculated]);
+  
+  useEffect(() => {
+    if (!map || !origin || !destination) {
+      return;
+    }
+    if (showDirectionsUI) return;
 
-    // Place new AdvancedMarker
-    markerRef.current = new window.google.maps.marker.AdvancedMarkerElement({
-      position: latLng,
-      map,
-    });
+    calculateRoute(origin, destination);
+  }, [map, origin, destination, showDirectionsUI, calculateRoute]);
+  
+  const onLoad = useCallback((mapInstance) => setMap(mapInstance), []);
+  const onUnmount = useCallback(() => setMap(null), []);
 
+  const placeMarker = (latLng) => {
+    setDirectionResponse(null);
+    setMarkerPosition(latLng);
     if (onLocationSelect) {
       onLocationSelect(latLng);
     }
   };
 
+  const handleClick = (e) => {
+    if (!isInteractive) return;
+    const latLng = { lat: e.latLng.lat(), lng: e.latLng.lng() };
+    placeMarker(latLng);
+  };
+
+  const handleCurrentLocation = (latLng) => {
+    if (!map) return;
+    map.panTo(latLng);
+    map.setZoom(15);
+  };
+
+  if (loadError) return <div>Error loading maps</div>;
+
   return isLoaded ? (
-    <GoogleMap
-      mapContainerStyle={{ width: "100%", height }}
-      center={center}
-      zoom={zoom}
-      onLoad={onLoad}
-      onUnmount={onUnmount}
-      onClick={handleClick}
-      mapTypeId={import.meta.env.VITE_GOOGLE_MAPS_MAP_ID}
-    />
-  ) : null;
+    <div style={{ position: "relative", height, width: '100%' }}>
+      <GoogleMap
+        mapContainerStyle={containerStyle}
+        center={center}
+        zoom={zoom}
+        options={mapOptions}
+        onLoad={onLoad}
+        onUnmount={onUnmount}
+        onClick={handleClick}
+      >
+        {!directionResponse && markerPosition && (
+          <Marker position={markerPosition} />
+        )}
+
+        {directionResponse && (
+          <>
+            <DirectionsRenderer 
+              directions={directionResponse} 
+              options={{ suppressMarkers: true }}
+            />
+            <Marker position={directionResponse.routes[0].legs[0].start_location} />
+            <Marker position={directionResponse.routes[0].legs[0].end_location} />
+          </>
+        )}
+      </GoogleMap>
+      <CurrentLocationButton onLocationFound={handleCurrentLocation} />
+    </div>
+  ) : <div>Loading...</div>;
 };
 
 export default React.memo(MapComponent);
