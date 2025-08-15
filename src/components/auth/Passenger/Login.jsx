@@ -11,7 +11,6 @@ const Login = () => {
   const navigate = useNavigate();
   const toast = useRef(null);
 
-  // Configure axios globally to send cookies
 
   const handleLogin = async () => {
     try {

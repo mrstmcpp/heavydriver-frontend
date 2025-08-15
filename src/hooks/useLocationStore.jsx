@@ -5,10 +5,12 @@ export const useLocationStore = create((set) => ({
     error: null,
 
     getLocation: () => {
+
         if(!navigator.geolocation){
             set({
-                error: "Geolocation is not supported by this browser."
+                error: "Geolocation is not supported by this browser.",
             });
+           
             return;
         }
 

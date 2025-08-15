@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect, use, useRef } from "react";
 import { PageTopBanner } from "../PageTopBanner";
 import YellowButton from "../../resusables/YellowButton";
 import CustomInput from "../../resusables/CustomInput";
@@ -6,6 +6,9 @@ import MapComponent from "../maps/MapComponent";
 import { Dialog } from "primereact/dialog";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import {useLocationStore} from "../../hooks/useLocationStore";
+import { Toast } from "primereact/toast";
+
 
 const BookRide = () => {
   const [startLocation, setStartLocation] = useState("");
@@ -15,11 +18,21 @@ const BookRide = () => {
   const [distance, setDistance] = useState(null);
   const [duration, setDuration] = useState(null);
   const navigate = useNavigate();
+  const toast = useRef(null);
+
 
   // Default center for the map
+  const {location , error , getLocation} = useLocationStore();
+  useEffect(() => {
+    try {
+      getLocation();
+    } catch (error) {
+      toast.current.show({severity:'error', summary: 'Error', detail:'Failed to fetch location', life: 3000});
+      console.error("Error fetching location:", error);
+    }
+  }, []);
 
-
-  const mapCenter = useMemo(() => ({ lat: 26.8467, lng: 80.9462 }), []);
+  const mapCenter = useMemo(() => ({ lat: location?.latitude || 25.49249, lng: location?.longitude || 81.85936 }), [location]);
 
   const handleLocationSelect = (coords) => {
     const formatted = `${coords.lat.toFixed(5)}, ${coords.lng.toFixed(5)}`;
@@ -83,6 +96,7 @@ const BookRide = () => {
   return (
     <div className="bg-black min-h-screen text-white">
       <PageTopBanner section="Book a Ride" />
+      <Toast ref={toast} />
 
       <div className="max-w-3xl mx-auto bg-[#0f0f0f] p-8 rounded-2xl shadow-lg mt-10 mb-10 border border-gray-800">
         <h2 className="text-4xl font-bold mb-2 text-yellow-400">
