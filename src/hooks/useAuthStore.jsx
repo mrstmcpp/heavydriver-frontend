@@ -1,27 +1,47 @@
+
 import { create } from "zustand";
 import axios from "axios";
 
 axios.defaults.withCredentials = true;
 
-const useAuthStore = create((set) => ({
+const useAuthStore = create((set, get) => ({
   authUser: null,
-  loading: true, // start in loading state
+  activeBooking: null,
+  loading: true,
 
   checkAuth: async () => {
-    set({ loading: true }); // mark as loading before checking
+    set({ loading: true });
     try {
       const res = await axios.get(
         `${import.meta.env.VITE_AUTH_BACKEND_URL}/auth/validate`
       );
-      console.log("Authentication status:", res.data);
 
       if (res.data?.loggedIn) {
+        console.log("User is authenticated:", res.data.user); 
         set({ authUser: res.data.user, loading: false });
+        get().fetchActiveBooking(res.data.userId);
+        
       } else {
-        set({ authUser: null, loading: false });
+        set({ authUser: null, activeBooking: null, loading: false });
       }
     } catch {
-      set({ authUser: null, loading: false });
+      set({ authUser: null, activeBooking: null, loading: false });
+    }
+  },
+
+  fetchActiveBooking: async (userId) => {
+    try {
+      const res = await axios.get(
+        `${import.meta.env.VITE_BOOKING_BACKEND_URL}/booking/active/${userId}`
+      );
+      if (res.data) {
+        set({ activeBooking: res.data });
+        // console.log("Fetched active booking:", get().activeBooking);
+      } else {
+        set({ activeBooking: null });
+      }
+    } catch {
+      set({ activeBooking: null });
     }
   },
 }));

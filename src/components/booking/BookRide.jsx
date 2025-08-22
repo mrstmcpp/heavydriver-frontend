@@ -8,9 +8,11 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import {useLocationStore} from "../../hooks/useLocationStore";
 import { Toast } from "primereact/toast";
+import useAuthStore from "../../hooks/useAuthStore";
 
 
 const BookRide = () => {
+  const {activeBooking} = useAuthStore();
   const [startLocation, setStartLocation] = useState("");
   const [endLocation, setEndLocation] = useState("");
   const [mapVisible, setMapVisible] = useState(false);
@@ -19,7 +21,11 @@ const BookRide = () => {
   const [duration, setDuration] = useState(null);
   const navigate = useNavigate();
   const toast = useRef(null);
-
+  useEffect(() => {
+    if (activeBooking) {
+      navigate(`/ride/${activeBooking}`, { replace: true });
+    }
+  }, [activeBooking, navigate]);
 
   // Default center for the map
   const {location , error , getLocation} = useLocationStore();
@@ -113,9 +119,8 @@ const BookRide = () => {
             </label>
             <select className="w-full bg-[#1a1a1a] text-white border border-gray-700 rounded px-4 py-3 focus:outline-none hover:border-yellow-400 transition">
               <option value="">Choose Taxi Type</option>
-              <option value="mini">Mini</option>
-              <option value="sedan">Sedan</option>
-              <option value="suv">SUV</option>
+              <option value="mini">Auto</option>
+
             </select>
           </div>
 

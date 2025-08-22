@@ -1,14 +1,20 @@
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getMenuItems } from "../content/items";
 import { Button } from "primereact/button";
-import { useState } from "react";
 import { Dialog } from "primereact/dialog";
 import { Menubar } from "primereact/menubar";
+import useAuthStore from "../hooks/useAuthStore";
 
 const Header = () => {
+  const { authUser, loading , activeBooking } = useAuthStore();
   const navigate = useNavigate();
   const menuItems = getMenuItems(navigate);
   const [menuVisible, setMenuVisible] = useState(false);
+
+  
+
+  
 
   return (
     <header className="sticky top-0 z-50 bg-black/5 backdrop-blur-md text-white shadow-md">
@@ -19,17 +25,19 @@ const Header = () => {
             className="text-2xl font-bold text-yellow-400 cursor-pointer"
             onClick={() => navigate("/")}
           >
-            <img src="/banner_logo_trans.png" alt="HeavyDriver Logo" className="h-12" />
+            <img
+              src="/banner_logo_trans.png"
+              alt="HeavyDriver Logo"
+              className="h-12"
+            />
           </h1>
         </div>
 
-        {/* Desktop Menu using Menubar */}
+        {/* Desktop Menu */}
         <div className="hidden md:flex flex-grow justify-center">
           <Menubar
             model={menuItems}
             className="bg-transparent border-none text-yellow-400"
-            start={null}
-            end={null}
             pt={{
               menuitem: {
                 className: "hover:text-yellow-300 text-sm",
@@ -50,13 +58,23 @@ const Header = () => {
             style={{ backgroundColor: "#38bdf8", color: "#000" }}
             onClick={() => navigate("/engineering")}
           />
-          <Button
-            label="Book a Ride"
-            icon="pi pi-send"
-            className="p-button-sm p-button-rounded"
-            style={{ backgroundColor: "#facc15", color: "#000" }}
-            onClick={() => navigate("/book")}
-          />
+          {activeBooking ? (
+            <Button
+              label="Ongoing Ride"
+              icon="pi pi-map-marker"
+              className="p-button-sm p-button-rounded"
+              style={{ backgroundColor: "#22c55e", color: "#000" }}
+              onClick={() => navigate(`/ride/${activeBooking}`)}
+            />
+          ) : (
+            <Button
+              label="Book a Ride"
+              icon="pi pi-send"
+              className="p-button-sm p-button-rounded"
+              style={{ backgroundColor: "#facc15", color: "#000" }}
+              onClick={() => navigate("/book")}
+            />
+          )}
         </div>
 
         {/* Mobile Menu Toggle */}
@@ -85,7 +103,9 @@ const Header = () => {
             if (item.items) {
               return (
                 <div key={idx} className="flex flex-col gap-1 pl-2">
-                  <span className="font-bold text-yellow-700">{item.label}</span>
+                  <span className="font-bold text-yellow-700">
+                    {item.label}
+                  </span>
                   {item.items.map((subItem, subIdx) => (
                     <Button
                       key={subIdx}
@@ -126,16 +146,24 @@ const Header = () => {
               setMenuVisible(false);
             }}
           />
-          <Button
-            label="Book a Ride"
-            icon="pi pi-send"
-            className="p-button-sm p-button-rounded"
-            style={{ backgroundColor: "#facc15", color: "#000" }}
-            onClick={() => {
-              navigate("/book");
-              setMenuVisible(false);
-            }}
-          />
+
+          {activeBooking ? (
+            <Button
+              label="Ongoing Ride"
+              icon="pi pi-map-marker"
+              className="p-button-sm p-button-rounded"
+              style={{ backgroundColor: "#22c55e", color: "#000" }}
+              onClick={() => navigate(`/ride/${activeBooking}`)}
+            />
+          ) : (
+            <Button
+              label="Book a Ride"
+              icon="pi pi-send"
+              className="p-button-sm p-button-rounded"
+              style={{ backgroundColor: "#facc15", color: "#000" }}
+              onClick={() => navigate("/book")}
+            />
+          )}
         </div>
       </Dialog>
     </header>

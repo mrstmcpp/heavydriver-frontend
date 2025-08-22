@@ -23,6 +23,8 @@ import PublicRoute from "./components/PublicRoutes";
 import ProtectedRoutes from "./components/ProtectedRoutes";
 import MapComponent from "./components/maps/MapComponent";
 import DriverFinding from "./components/booking/DriverFinding";
+import Socket from "./components/Socket";
+import OngoingRide from "./components/booking/OngoingRide";
 
 axios.defaults.withCredentials = true;
 function App() {
@@ -35,6 +37,7 @@ function App() {
   return (
     <>
       <ScrollToTop />
+      <Socket />
       <Routes>
         <Route path="/" element={<Layout />}>
           <Route index element={<HomePage />} />
@@ -52,6 +55,13 @@ function App() {
           <Route path="book" element={
             <ProtectedRoutes>
               <BookRide />
+            </ProtectedRoutes>
+          } />
+
+          <Route path="ride/:bookingId" element={
+            <ProtectedRoutes>
+              
+              <OngoingRide />
             </ProtectedRoutes>
           } />
       
