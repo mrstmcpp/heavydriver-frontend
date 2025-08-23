@@ -1,7 +1,9 @@
-import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
-import React, { useEffect, useRef } from "react";
-import "leaflet/dist/leaflet.css";
-import L from "leaflet";
+import React, {
+  useEffect,
+  useRef,
+  useState,
+  useMemo,
+} from "react";
 import carIconImg from "../../assets/car.png";
 import { useSearchParams } from "react-router-dom";
 import useNearbyDriversStore from "../../hooks/useNearbyDriversStore";
@@ -9,19 +11,36 @@ import driverpng from "../../assets/driver.png";
 import NearbyDrivers from "./NearbyDrivers";
 import { Toast } from "primereact/toast";
 
-const carIcon = new L.Icon({
-  iconUrl: carIconImg,
-  iconSize: [40, 40],
-  iconAnchor: [20, 20],
-  popupAnchor: [0, -20],
-});
+import {
+  useJsApiLoader,
+  GoogleMap,
+  Marker,
+  InfoWindow,
+} from "@react-google-maps/api";
 
 const DriverFinding = () => {
+  const { isLoaded } = useJsApiLoader({
+    id: "google-map-script",
+    googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
+  });
+
   const [searchParams] = useSearchParams();
   const startLat = parseFloat(searchParams.get("startLat"));
   const startLng = parseFloat(searchParams.get("startLng"));
+
+  const mapCenter = useMemo(
+    () => ({
+      lat: startLat || 25.49249,
+      lng: startLng || 81.85936,
+    }),
+    [startLat, startLng]
+  );
+
+  const [activeDriver, setActiveDriver] = useState(null);
   const { drivers, fetchNearbyDrivers } = useNearbyDriversStore();
   const toast = useRef(null);
+
+  const mapRef = useRef(null);
 
   useEffect(() => {
     toast.current?.show({
@@ -35,60 +54,77 @@ const DriverFinding = () => {
   useEffect(() => {
     if (startLat && startLng) {
       fetchNearbyDrivers(startLat, startLng);
-      //30 sec delay
       const intervalId = setInterval(() => {
         fetchNearbyDrivers(startLat, startLng);
       }, 30000);
 
       return () => clearInterval(intervalId);
     }
-  }, [fetchNearbyDrivers]);
+  }, [startLat, startLng]);
+
+  const handleMapLoad = (map) => {
+    mapRef.current = map;
+  };
 
   return (
     <div>
       <div className="h-[600px] w-full">
         <Toast ref={toast} />
-
-        <MapContainer
-          center={[startLat, startLng]}
-          zoom={16}
-          className="h-[600px] w-full"
-        >
-          <TileLayer
-            attribution='&copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a>'
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          />
-
-          {drivers && drivers.length > 0 ? (
-            drivers.map((driver) => (
+        {isLoaded ? (
+          <GoogleMap
+            center={mapCenter}
+            zoom={16}
+            mapContainerStyle={{ width: "100%", height: "800px" }}
+            options={{
+              zoomControl: true,
+              streetViewControl: false,
+              mapTypeControl: false,
+            }}
+            onLoad={handleMapLoad}
+          >
+            {drivers?.map((driver) => (
               <Marker
                 key={driver.driverId}
-                position={[driver.latitude, driver.longitude]}
-                icon={carIcon}
+                position={{
+                  lat: parseFloat(driver.latitude),
+                  lng: parseFloat(driver.longitude),
+                }}
+                icon={{
+                  url: carIconImg,
+                  scaledSize: new window.google.maps.Size(40, 40),
+                  anchor: new window.google.maps.Point(20, 20),
+                }}
+                onMouseOver={() => setActiveDriver(driver.driverId)}
+                onMouseOut={() => setActiveDriver(null)}
               >
-                <Popup>
-                  <div className="text-center">
-                    <img
-                      src={driver.imageUrl || `${driverpng}`}
-                      alt="Driver"
-                      className="w-14 h-14 rounded-full object-cover mx-auto"
-                    />
-                    <p className="font-bold text-sm">
-                      Driver ID: {driver.driverId}
-                    </p>
-                    <p className="text-xs text-gray-600">
-                      Rating: {driver.rating || "N/A"}
-                    </p>
-                  </div>
-                </Popup>
+                {activeDriver === driver.driverId && (
+                  <InfoWindow
+                    position={{
+                      lat: parseFloat(driver.latitude),
+                      lng: parseFloat(driver.longitude),
+                    }}
+                    options={{
+                      pixelOffset: new window.google.maps.Size(0, -40),
+                    }}
+                  >
+                    <div className="flex flex-col items-center">
+                      <img
+                        src={driver.profilePic || driverpng}
+                        alt="driver"
+                        className="w-12 h-12 rounded-full mb-2"
+                      />
+                      <p className="text-sm font-semibold text-gray-800">
+                        Driver ID: {driver.driverId}
+                      </p>
+                    </div>
+                  </InfoWindow>
+                )}
               </Marker>
-            ))
-          ) : (
-            <Popup position={[startLat, startLng]}>
-              <div className="text-center text-sm">🚗 No drivers nearby</div>
-            </Popup>
-          )}
-        </MapContainer>
+            ))}
+          </GoogleMap>
+        ) : (
+          <>Loading...</>
+        )}
       </div>
       <NearbyDrivers drivers={drivers} />
     </div>

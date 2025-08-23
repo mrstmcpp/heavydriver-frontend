@@ -1,13 +1,13 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
-import { MapContainer, TileLayer, Marker, Polyline } from "react-leaflet";
-import "leaflet/dist/leaflet.css";
+import MapComponent from "../maps/MapComponent";
 
 const OngoingRide = () => {
   const { bookingId } = useParams();
   const [ride, setRide] = useState(null);
-  
+  const [distance, setDistance] = useState(null);
+  const [duration, setDuration] = useState(null);
 
   useEffect(() => {
     const fetchRide = async () => {
@@ -16,6 +16,7 @@ const OngoingRide = () => {
           `${import.meta.env.VITE_BOOKING_BACKEND_URL}/booking/${bookingId}`
         );
         setRide(res.data);
+        console.log("Ride details:", res.data);
       } catch (err) {
         console.error("Error fetching ride:", err);
       }
@@ -23,6 +24,17 @@ const OngoingRide = () => {
 
     fetchRide();
   }, [bookingId]);
+
+  // ✅ Prevent infinite updates by checking before setting state
+  const handleRouteCalculated = useCallback(
+    (dist, time) => {
+      if (dist !== distance || time !== duration) {
+        setDistance(dist);
+        setDuration(time);
+      }
+    },
+    [distance, duration]
+  );
 
   if (!ride) {
     return (
@@ -32,31 +44,35 @@ const OngoingRide = () => {
     );
   }
 
-  const { bookingStatus, driverName, driverId, startLocation, endLocation } = ride;
+  const { bookingStatus, driverName, driverId, startLocation, endLocation } =
+    ride;
+
+  const mapCenter = {
+    lat: (startLocation.latitude + endLocation.latitude) / 2,
+    lng: (startLocation.longitude + endLocation.longitude) / 2,
+  };
 
   return (
     <div className="min-h-screen bg-black text-white p-6">
       <h2 className="text-2xl font-bold text-yellow-400 mb-6">Ongoing Ride</h2>
 
-      {/* Main Content Grid */}
       <div className="flex flex-col lg:flex-row gap-6">
-        
-        {/* Left Side - Ride Details */}
+        {/* Left - Ride Info */}
         <div className="lg:w-1/3 w-full space-y-6">
-          {/* Ride Status */}
           <div className="bg-zinc-900 rounded-2xl shadow-lg p-4">
             <p className="text-lg">
               Status:{" "}
-              <span className="font-semibold text-yellow-400">{bookingStatus}</span>
+              <span className="font-semibold text-yellow-400">
+                {bookingStatus}
+              </span>
             </p>
           </div>
 
-          {/* Driver Info */}
           <div className="bg-zinc-900 rounded-2xl shadow-lg p-4 flex items-center gap-4">
             <img
               src={`/drivers/driver.png`}
               alt={driverName}
-              className="w-20 h-20 rounded-full object-cover shadow-md border-2 border-yellow-400"
+              className="w-20 h-20 rounded-full border-2 border-yellow-400"
             />
             <div>
               <p className="text-xl font-semibold">{driverName}</p>
@@ -65,55 +81,61 @@ const OngoingRide = () => {
             </div>
           </div>
 
-          {/* Reviews (Dummy Data) */}
-          <div className="bg-zinc-900 rounded-2xl shadow-lg p-4">
-            <h3 className="text-lg font-semibold text-yellow-400 mb-2">Reviews</h3>
-            <ul className="space-y-2 text-sm text-gray-300">
-              <li>⭐ Great driver, smooth ride.</li>
-              <li>⭐ Very polite and professional.</li>
-              <li>⭐ Reached on time, clean vehicle.</li>
-            </ul>
-          </div>
-
-          {/* Ride Locations */}
-          <div className="bg-zinc-900 rounded-2xl shadow-lg p-4">
-            <p className="mb-2">
-              <span className="text-yellow-400">Start:</span>{" "}
-              {startLocation.latitude}, {startLocation.longitude}
-            </p>
-            <p>
-              <span className="text-yellow-400">End:</span>{" "}
-              {endLocation.latitude}, {endLocation.longitude}
-            </p>
-          </div>
+          {/* Distance + Duration */}
+          {distance && duration && (
+            <div className="grid grid-cols-2 gap-4 text-center bg-[#1a1a1a] p-4 rounded-lg">
+              <div>
+                <p className="text-sm text-gray-400">Est. Distance</p>
+                <p className="text-xl font-bold">{distance}</p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-400">Est. Time</p>
+                <p className="text-xl font-bold">{duration}</p>
+              </div>
+            </div>
+          )}
         </div>
 
-        {/* Right Side - Map */}
+        {/* Right - Map */}
         <div className="lg:w-2/3 w-full">
           <div className="rounded-2xl overflow-hidden shadow-lg h-[400px] lg:h-[500px]">
-            <MapContainer
-              center={[startLocation.latitude, startLocation.longitude]}
-              zoom={6}
-              scrollWheelZoom={false}
-              className="h-full w-full"
-            >
-              <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+            {startLocation && endLocation && (
+              <div className="space-y-4">
+                <h3 className="text-2xl font-semibold text-yellow-400 border-b border-gray-700 pb-2">
+                  Your Route
+                </h3>
+                <div className="h-64 md:h-80 w-full">
+                  <MapComponent
+                    origin={{
+                      lat: startLocation.latitude,
+                      lng: startLocation.longitude,
+                    }}
+                    destination={{
+                      lat: endLocation.latitude,
+                      lng: endLocation.longitude,
+                    }}
+                    onRouteCalculated={handleRouteCalculated}
+                    center={mapCenter}
+                    showDirectionsUI={false}
+                    isInteractive={false}
+                    height="100%"
+                  />
+                </div>
 
-              {/* Start Marker */}
-              <Marker position={[startLocation.latitude, startLocation.longitude]} />
-
-              {/* End Marker */}
-              <Marker position={[endLocation.latitude, endLocation.longitude]} />
-
-              {/* Route Line */}
-              <Polyline
-                positions={[
-                  [startLocation.latitude, startLocation.longitude],
-                  [endLocation.latitude, endLocation.longitude],
-                ]}
-                color="yellow"
-              />
-            </MapContainer>
+                {distance && duration && (
+                  <div className="grid grid-cols-2 gap-4 text-center bg-[#1a1a1a] p-4 rounded-lg">
+                    <div>
+                      <p className="text-sm text-gray-400">Est. Distance</p>
+                      <p className="text-xl font-bold">{distance}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-400">Est. Time</p>
+                      <p className="text-xl font-bold">{duration}</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </div>

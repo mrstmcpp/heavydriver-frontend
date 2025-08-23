@@ -29,9 +29,17 @@ const MapComponent = ({
   const [map, setMap] = useState(null);
   const [markerPosition, setMarkerPosition] = useState(null);
   const [directionResponse, setDirectionResponse] = useState(null);
+  const prevRouteRef = useRef(null); // ✅ keep track of last origin+dest
 
   const calculateRoute = useCallback(async (originVal, destinationVal) => {
     if (!originVal || !destinationVal) return;
+
+
+    const prev = prevRouteRef.current;
+    if (prev && prev.origin.lat === originVal.lat && prev.origin.lng === originVal.lng &&
+        prev.destination.lat === destinationVal.lat && prev.destination.lng === destinationVal.lng) {
+      return;
+    }
 
     const directionService = new window.google.maps.DirectionsService();
     try {
@@ -42,32 +50,30 @@ const MapComponent = ({
       });
 
       setDirectionResponse(results);
-      setMarkerPosition(null); // Clear single marker when route is shown
+      setMarkerPosition(null); 
+      prevRouteRef.current = { origin: originVal, destination: destinationVal };
+
       const leg = results.routes[0].legs[0];
-      
+
       if (onRouteCalculated) {
-        onRouteCalculated({
-          distance: leg.distance.text,
-          duration: leg.duration.text,
-        });
+        onRouteCalculated(leg.distance.text, leg.duration.text);
       }
 
     } catch (error) {
       console.error("Error calculating route:", error);
       setDirectionResponse(null);
-      if(onRouteCalculated) onRouteCalculated({ distance: null, duration: null });
+      prevRouteRef.current = null;
+      if (onRouteCalculated) onRouteCalculated(null, null);
     }
   }, [onRouteCalculated]);
-  
+
   useEffect(() => {
-    if (!map || !origin || !destination) {
-      return;
-    }
+    if (!map || !origin || !destination) return;
     if (showDirectionsUI) return;
 
     calculateRoute(origin, destination);
   }, [map, origin, destination, showDirectionsUI, calculateRoute]);
-  
+
   const onLoad = useCallback((mapInstance) => setMap(mapInstance), []);
   const onUnmount = useCallback(() => setMap(null), []);
 
