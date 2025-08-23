@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect, use, useRef } from "react";
+import React, { useState, useMemo, useEffect, useRef } from "react";
 import { PageTopBanner } from "../PageTopBanner";
 import YellowButton from "../../resusables/YellowButton";
 import CustomInput from "../../resusables/CustomInput";
@@ -6,46 +6,51 @@ import MapComponent from "../maps/MapComponent";
 import { Dialog } from "primereact/dialog";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import {useLocationStore} from "../../hooks/useLocationStore";
+import { useLocationStore } from "../../hooks/useLocationStore";
 import { Toast } from "primereact/toast";
 import useAuthStore from "../../hooks/useAuthStore";
 
-
 const BookRide = () => {
-  const {activeBooking} = useAuthStore();
-  const [startLocation, setStartLocation] = useState("");
-  const [endLocation, setEndLocation] = useState("");
+  const { activeBooking } = useAuthStore();
+  const [startLocation, setStartLocation] = useState(null);
+  const [endLocation, setEndLocation] = useState(null);
   const [mapVisible, setMapVisible] = useState(false);
   const [activeField, setActiveField] = useState(null);
   const [distance, setDistance] = useState(null);
   const [duration, setDuration] = useState(null);
+  const { location, error, getLocation } = useLocationStore();
   const navigate = useNavigate();
   const toast = useRef(null);
+
   useEffect(() => {
     if (activeBooking) {
       navigate(`/ride/${activeBooking}`, { replace: true });
     }
   }, [activeBooking, navigate]);
 
-  // Default center for the map
-  const {location , error , getLocation} = useLocationStore();
   useEffect(() => {
     try {
       getLocation();
     } catch (error) {
-      toast.current.show({severity:'error', summary: 'Error', detail:'Failed to fetch location', life: 3000});
+      toast.current.show({ severity: "error", summary: "Error", detail: "Failed to fetch location", life: 3000 });
       console.error("Error fetching location:", error);
     }
   }, []);
 
-  const mapCenter = useMemo(() => ({ lat: location?.latitude || 25.49249, lng: location?.longitude || 81.85936 }), [location]);
+  const mapCenter = useMemo(() => {
+  if (location?.latitude && location?.longitude) {
+    return Object.freeze({ lat: location.latitude, lng: location.longitude });
+  }
+  return Object.freeze({ lat: 25.49249, lng: 81.85936 });
+}, [location?.latitude, location?.longitude]);
 
+
+  console.log(location);
   const handleLocationSelect = (coords) => {
-    const formatted = `${coords.lat.toFixed(5)}, ${coords.lng.toFixed(5)}`;
     if (activeField === "start") {
-      setStartLocation(formatted);
+      setStartLocation(coords);
     } else if (activeField === "end") {
-      setEndLocation(formatted);
+      setEndLocation(coords);
     }
     setMapVisible(false);
   };
@@ -62,37 +67,31 @@ const BookRide = () => {
     setMapVisible(true);
   };
 
-  // ${import.meta.env.VITE_BOOKING_BACKEND_URL}/api/v1/booking
-
   const handleBooking = async () => {
     if (!startLocation || !endLocation) {
       alert("Please fill all fields before booking.");
       return;
     }
 
-    const [startLat, startLng] = startLocation.split(",").map(Number);
-    const [endLat, endLng] = endLocation.split(",").map(Number);
-
     try {
       const passengerId = 1;
-
       await axios.post(
         `${import.meta.env.VITE_BOOKING_BACKEND_URL}/booking`,
         {
           passengerId,
           startLocation: {
-            latitude: startLat,
-            longitude: startLng,
+            latitude: startLocation.lat,
+            longitude: startLocation.lng,
           },
           endLocation: {
-            latitude: endLat,
-            longitude: endLng,
+            latitude: endLocation.lat,
+            longitude: endLocation.lng,
           },
         },
         { withCredentials: true }
       );
 
-      navigate(`/driver-finding?startLat=${startLat}&startLng=${startLng}`);
+      navigate(`/driver-finding?startLat=${startLocation.lat}&startLng=${startLocation.lng}`);
     } catch (error) {
       console.error("Booking failed:", error);
       alert("Booking failed, please try again.");
@@ -105,22 +104,15 @@ const BookRide = () => {
       <Toast ref={toast} />
 
       <div className="max-w-3xl mx-auto bg-[#0f0f0f] p-8 rounded-2xl shadow-lg mt-10 mb-10 border border-gray-800">
-        <h2 className="text-4xl font-bold mb-2 text-yellow-400">
-          Book Your Taxi Ride!
-        </h2>
-        <p className="text-gray-400 mb-8">
-          Choose your preferences and we'll find you the best ride.
-        </p>
+        <h2 className="text-4xl font-bold mb-2 text-yellow-400">Book Your Taxi Ride!</h2>
+        <p className="text-gray-400 mb-8">Choose your preferences and we'll find you the best ride.</p>
 
         <div className="space-y-8">
           <div>
-            <label className="block text-sm mb-1 text-gray-400">
-              Taxi Type
-            </label>
+            <label className="block text-sm mb-1 text-gray-400">Taxi Type</label>
             <select className="w-full bg-[#1a1a1a] text-white border border-gray-700 rounded px-4 py-3 focus:outline-none hover:border-yellow-400 transition">
               <option value="">Choose Taxi Type</option>
               <option value="mini">Auto</option>
-
             </select>
           </div>
 
@@ -129,7 +121,7 @@ const BookRide = () => {
               <CustomInput
                 label="Start Location"
                 icon="pi pi-map-marker"
-                value={startLocation}
+                value={startLocation ? `${startLocation.lat.toFixed(5)}, ${startLocation.lng.toFixed(5)}` : ""}
                 readOnly
               />
             </div>
@@ -137,7 +129,7 @@ const BookRide = () => {
               <CustomInput
                 label="End Location"
                 icon="pi pi-map-marker"
-                value={endLocation}
+                value={endLocation ? `${endLocation.lat.toFixed(5)}, ${endLocation.lng.toFixed(5)}` : ""}
                 readOnly
               />
             </div>
@@ -145,9 +137,7 @@ const BookRide = () => {
 
           {startLocation && endLocation && (
             <div className="space-y-4">
-              <h3 className="text-2xl font-semibold text-yellow-400 border-b border-gray-700 pb-2">
-                Your Route
-              </h3>
+              <h3 className="text-2xl font-semibold text-yellow-400 border-b border-gray-700 pb-2">Your Route</h3>
               <div className="h-64 md:h-80 w-full">
                 <MapComponent
                   origin={startLocation}
@@ -182,18 +172,13 @@ const BookRide = () => {
       </div>
 
       <Dialog
-        header={`Select ${activeField === "start" ? "Start" : "End"} Location`}
+        header={`Select Destination Location`}
         visible={mapVisible}
         maximizable
         style={{ width: "80vw", height: "80vh" }}
         onHide={() => setMapVisible(false)}
       >
-        <MapComponent
-          center={mapCenter}
-          height="65vh"
-          onLocationSelect={handleLocationSelect}
-          showDirectionsUI={false}
-        />
+        <MapComponent center={mapCenter} height="65vh" onLocationSelect={handleLocationSelect} showDirectionsUI={false} />
       </Dialog>
     </div>
   );

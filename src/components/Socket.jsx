@@ -28,7 +28,7 @@ const Socket = () => {
             summary: "Your ride is scheduled with " + msg.fullName,
             detail: (
               <Link
-                to={`/ride/${msg.rideId || "123"}`} // dynamic rideId if available
+                to={`/ride/${msg.bookingId || "123"}`} // dynamic rideId if available
                 className="text-yellow-400 underline hover:text-yellow-300"
               >
                 View Ride Details

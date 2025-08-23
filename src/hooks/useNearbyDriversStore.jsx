@@ -11,6 +11,8 @@ const useNearbyDriversStore = create((set) => ({
         `${import.meta.env.VITE_LOCATION_BACKEND_URL}/location/nearby/drivers`,
         { latitude, longitude }
       );
+
+      // console.log("Nearby drivers fetched:", response.data);
       set({ drivers: response.data });
     } catch (error) {
       console.error("Error fetching drivers:", error);
