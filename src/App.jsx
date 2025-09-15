@@ -25,6 +25,7 @@ import MapComponent from "./components/maps/MapComponent";
 import DriverFinding from "./components/booking/DriverFinding";
 import Socket from "./components/Socket";
 import OngoingRide from "./components/booking/OngoingRide";
+import CompletedRide from "./components/booking/CompletedBooking";
 
 axios.defaults.withCredentials = true;
 function App() {
@@ -52,6 +53,8 @@ function App() {
           <Route path="driver-finding" element={<DriverFinding />} />
 
           {/* protected routes start from here */}
+          <Route path="/ride/completed/:bookingId" element={<CompletedRide />} />
+
           <Route path="book" element={
             <ProtectedRoutes>
               <BookRide />

@@ -18,6 +18,12 @@ const OngoingRide = () => {
           `${import.meta.env.VITE_BOOKING_BACKEND_URL}/booking/${bookingId}`
         );
         setRide(res.data);
+
+        if (res.data.bookingStatus === "COMPLETED") {
+          window.location.href = `/ride/completed/${bookingId}`;
+          return;
+        }
+        // Log the ride details for debugging
         console.log("Ride details:", res.data);
       } catch (err) {
         console.error("Error fetching ride:", err);
@@ -55,7 +61,7 @@ const OngoingRide = () => {
 
   return (
     <>
-        <PageTopBanner section="Ongoing Ride" />
+      <PageTopBanner section="Ongoing Ride" />
       <div className="bg-black text-white py-16 px-6 sm:px-12 lg:px-24">
         <div className="max-w-5xl mx-auto">
           {/* Title */}
@@ -83,8 +89,9 @@ const OngoingRide = () => {
               </p>
               <p className="text-sm text-gray-400">🚗 Car No: UP65 AB 1234</p>
             </div>
+
             {distance && duration && (
-              <div className="bg-[#1a1a1a] rounded-2xl shadow-lg p-6 mb-10 grid grid-cols-2 gap-6 text-center">
+              <div className="bg-[#1a1a1a] rounded-2xl shadow-lg p-6 grid grid-cols-2 gap-6 text-center">
                 <div>
                   <p className="text-sm text-gray-400">Est. Distance</p>
                   <p className="text-2xl font-bold">{distance}</p>
@@ -95,6 +102,14 @@ const OngoingRide = () => {
                 </div>
               </div>
             )}
+          </div>
+
+          {/* OTP Section */}
+          <div className="bg-[#1a1a1a] rounded-2xl shadow-lg p-8 mb-10 text-center">
+            <p className="text-lg text-gray-400 mb-2">Ride OTP</p>
+            <p className="text-5xl font-extrabold tracking-widest text-yellow-400">
+              {ride.otp}
+            </p>
           </div>
 
           {/* Distance & Duration Card */}
