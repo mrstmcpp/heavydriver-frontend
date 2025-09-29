@@ -8,6 +8,7 @@ const useAuthStore = create((set, get) => ({
   authUser: null,
   activeBooking: null,
   loading: true,
+  userId: null,
 
   checkAuth: async () => {
     set({ loading: true });
@@ -17,8 +18,8 @@ const useAuthStore = create((set, get) => ({
       );
 
       if (res.data?.loggedIn) {
-        console.log("User is authenticated:", res.data.user); 
-        set({ authUser: res.data.user, loading: false });
+        console.log("User is authenticated:", res.data);
+        set({ authUser: res.data.user, loading: false, userId: res.data.userId });
         get().fetchActiveBooking(res.data.userId);
         
       } else {

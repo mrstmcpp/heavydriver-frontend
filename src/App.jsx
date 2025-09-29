@@ -26,6 +26,7 @@ import DriverFinding from "./components/booking/DriverFinding";
 import Socket from "./components/Socket";
 import OngoingRide from "./components/booking/OngoingRide";
 import CompletedRide from "./components/booking/CompletedBooking";
+import { SocketProvider } from "./context/SocketContext";
 
 axios.defaults.withCredentials = true;
 function App() {
@@ -37,8 +38,10 @@ function App() {
 
   return (
     <>
+      <SocketProvider>
+
       <ScrollToTop />
-      <Socket />
+      
       <Routes>
         <Route path="/" element={<Layout />}>
           <Route index element={<HomePage />} />
@@ -88,6 +91,8 @@ function App() {
           />
         </Route>
       </Routes>
+      </SocketProvider>
+
     </>
   );
 }
