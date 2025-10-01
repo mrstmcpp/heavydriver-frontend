@@ -23,6 +23,11 @@ const OngoingRide = () => {
           window.location.href = `/ride/completed/${bookingId}`;
           return;
         }
+
+        if (res.data.bookingStatus === "CANCELLED") {
+          window.location.href = `/ride/cancelled/${bookingId}`;
+          return;
+        }
         // Log the ride details for debugging
         console.log("Ride details:", res.data);
       } catch (err) {

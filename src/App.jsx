@@ -26,6 +26,7 @@ import DriverFinding from "./components/booking/DriverFinding";
 import Socket from "./components/Socket";
 import OngoingRide from "./components/booking/OngoingRide";
 import CompletedRide from "./components/booking/CompletedBooking";
+import CancelledRide from "./components/booking/CancelledBooking";
 import { SocketProvider } from "./context/SocketContext";
 
 axios.defaults.withCredentials = true;
@@ -57,6 +58,7 @@ function App() {
 
           {/* protected routes start from here */}
           <Route path="/ride/completed/:bookingId" element={<CompletedRide />} />
+          <Route path="/ride/cancelled/:bookingId" element={<CancelledRide />} />
 
           <Route path="book" element={
             <ProtectedRoutes>
