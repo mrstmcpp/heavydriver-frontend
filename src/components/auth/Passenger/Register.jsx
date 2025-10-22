@@ -15,7 +15,7 @@ const Register = () => {
   const handleRegister = async () => {
     try {
       const res = await axios.post(
-        `${import.meta.env.VITE_AUTH_BACKEND_URL}/auth/signup/passenger`,
+        `${import.meta.env.VITE_AUTH_BACKEND_URL}/signup/passenger`,
         {
           name,
           email,

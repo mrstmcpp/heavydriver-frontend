@@ -13,7 +13,7 @@ const MeetTheManBehind = () => {
         
         {/* Image */}
         <motion.img
-          src="/mrstm.jpg" // Change this to your image path
+          src="/mrstm.jpg" 
           alt="Founder"
           className="rounded-2xl shadow-lg border-2 border-yellow-400"
           initial={{ opacity: 0, x: -50 }}

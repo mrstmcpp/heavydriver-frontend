@@ -1,4 +1,3 @@
-
 import { create } from "zustand";
 import axios from "axios";
 
@@ -6,43 +5,70 @@ axios.defaults.withCredentials = true;
 
 const useAuthStore = create((set, get) => ({
   authUser: null,
-  activeBooking: null,
   loading: true,
+  name: null,
+  role: null,
   userId: null,
 
+  setUser: (userData) => {
+    set({
+      authUser: userData,
+      name: userData.name || null,
+      role: userData.role || null,
+      userId: userData.userId || null,
+    });
+    localStorage.setItem("user", JSON.stringify(userData)); // sstoring non-sensitive data
+  },
+
+  initializeAuth: async () => {
+    const storedUser = JSON.parse(localStorage.getItem("user"));
+    if (storedUser) set({ authUser: storedUser });
+  },
+
   checkAuth: async () => {
+    // console.log("checkAuth called");
     set({ loading: true });
     try {
       const res = await axios.get(
-        `${import.meta.env.VITE_AUTH_BACKEND_URL}/auth/validate`
+        `${import.meta.env.VITE_AUTH_BACKEND_URL}/validate`,
+        { withCredentials: true }
       );
 
       if (res.data?.loggedIn) {
-        console.log("User is authenticated:", res.data);
-        set({ authUser: res.data.user, loading: false, userId: res.data.userId });
-        get().fetchActiveBooking(res.data.userId);
-        
-      } else {
-        set({ authUser: null, activeBooking: null, loading: false });
-      }
-    } catch {
-      set({ authUser: null, activeBooking: null, loading: false });
-    }
-  },
+        // console.log("User is authenticated:", res.data);
 
-  fetchActiveBooking: async (userId) => {
-    try {
-      const res = await axios.get(
-        `${import.meta.env.VITE_BOOKING_BACKEND_URL}/booking/active/${userId}`
-      );
-      if (res.data) {
-        set({ activeBooking: res.data });
-        // console.log("Fetched active booking:", get().activeBooking);
+        const userData = {
+          email: res.data.user,
+          name: res.data.name,
+          userId: res.data.userId,
+          role: res.data.role,
+        };
+
+        set({
+          authUser: userData,
+          loading: false,
+          name: res.data.name,
+          role: res.data.role,
+          userId: res.data.userId,
+        });
       } else {
-        set({ activeBooking: null });
+        set({
+          authUser: null,
+          loading: false,
+          userId: null,
+          name: null,
+          role: null,
+        });
       }
-    } catch {
-      set({ activeBooking: null });
+    } catch (err) {
+      console.error("Auth validation failed:", err.message);
+      set({
+        authUser: null,
+        name: null,
+        role: null,
+        loading: false,
+        userId: null,
+      });
     }
   },
 }));

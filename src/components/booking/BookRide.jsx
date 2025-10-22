@@ -11,7 +11,7 @@ import { Toast } from "primereact/toast";
 import useAuthStore from "../../hooks/useAuthStore";
 
 const BookRide = () => {
-  const { activeBooking } = useAuthStore();
+  const { activeBooking , userId } = useAuthStore();
   const [startLocation, setStartLocation] = useState(null);
   const [endLocation, setEndLocation] = useState(null);
   const [mapVisible, setMapVisible] = useState(false);
@@ -74,9 +74,9 @@ const BookRide = () => {
     }
 
     try {
-      const passengerId = 1;
+      const passengerId = userId;
       await axios.post(
-        `${import.meta.env.VITE_BOOKING_BACKEND_URL}/booking`,
+        `${import.meta.env.VITE_BOOKING_BACKEND_URL}`,
         {
           passengerId,
           startLocation: {

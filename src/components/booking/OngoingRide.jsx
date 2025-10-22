@@ -3,9 +3,12 @@ import { useParams } from "react-router-dom";
 import axios from "axios";
 import MapComponent from "../maps/MapComponent";
 import { PageTopBanner } from "../PageTopBanner";
+import useAuthStore from "../../hooks/useAuthStore";
+import { stringify } from "sockjs-client/dist/sockjs";
 
 const OngoingRide = () => {
   const { bookingId } = useParams();
+  const { loading, userId } = useAuthStore();
   const [ride, setRide] = useState(null);
   const [distance, setDistance] = useState(null);
   const [duration, setDuration] = useState(null);
@@ -13,9 +16,16 @@ const OngoingRide = () => {
   useEffect(() => {
     //TODO: if user dont have active booking , he should not accesss this page
     const fetchRide = async () => {
+      if (loading || !userId || !bookingId) {
+        return;
+      }
       try {
-        const res = await axios.get(
-          `${import.meta.env.VITE_BOOKING_BACKEND_URL}/booking/${bookingId}`
+        const res = await axios.post(
+          `${import.meta.env.VITE_BOOKING_BACKEND_URL}/details/${bookingId}`,
+          { userId,
+            role: "PASSENGER"
+
+           }
         );
         setRide(res.data);
 
@@ -36,7 +46,7 @@ const OngoingRide = () => {
     };
 
     fetchRide();
-  }, [bookingId]);
+  }, [bookingId , loading]);
 
   const handleRouteCalculated = useCallback(
     (dist, time) => {

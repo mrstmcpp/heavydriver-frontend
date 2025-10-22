@@ -15,8 +15,8 @@ const Login = () => {
   const handleLogin = async () => {
     try {
       await axios.post(
-        `${import.meta.env.VITE_AUTH_BACKEND_URL}/auth/signin/passenger`,
-        { email, password }
+        `${import.meta.env.VITE_AUTH_BACKEND_URL}/signin`,
+        { email, password, role: "PASSENGER" }
       );
       toast.current.show({severity:'success', summary: 'Success', detail:'Login successful', life: 3000});
       navigate("/");

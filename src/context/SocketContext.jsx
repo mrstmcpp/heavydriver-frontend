@@ -42,6 +42,25 @@ export const SocketProvider = ({ children }) => {
             life: 5000,
           });
         });
+
+
+        // stompClient.subscribe(`/topic/driver/${userId}/driver-location`, (data) => {
+        //   const msg = JSON.parse(data.body);
+        //   console.log("Received location:", msg);
+
+        //   toastBottomRight.current.show({
+        //     severity: "warn",
+        //     summary: `Location received`,
+        //     detail: (
+        //       <>
+        //       <p>
+        //         {msg.latitude}, {msg.longitude}
+        //       </p>
+        //       </>
+        //     ),  
+        //     life: 5000,
+        //   });
+        // });
       },
       onStompError: (frame) => {
         console.error("Broker error:", frame.headers["message"]);

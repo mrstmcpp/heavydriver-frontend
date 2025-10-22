@@ -8,7 +8,7 @@ const useNearbyDriversStore = create((set) => ({
     try {
       console.log("Fetching nearby drivers for:", latitude, longitude);
       const response = await axios.post(
-        `${import.meta.env.VITE_LOCATION_BACKEND_URL}/location/nearby/drivers`,
+        `${import.meta.env.VITE_LOCATION_BACKEND_URL}/nearby/drivers`,
         { latitude, longitude }
       );
 
