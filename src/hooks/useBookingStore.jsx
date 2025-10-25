@@ -64,6 +64,8 @@ const useBookingStore = create((set, get) => ({
 
 export default useBookingStore;
 
+//chatgpt
+
 useAuthStore.subscribe((state) => {
   const { userId } = state;
   const bookingStore = useBookingStore.getState();
@@ -71,12 +73,12 @@ useAuthStore.subscribe((state) => {
   if (userId) {
     // User logged in → fetch active booking
     if (import.meta.env.DEV)
-      console.log("👤 Auth change detected → Fetching active booking...");
+      console.log("Auth change detected → Fetching active booking...");
     bookingStore.fetchActiveBooking();
   } else {
     // User logged out → clear booking data
     if (import.meta.env.DEV)
-      console.log("🚪 User logged out → Clearing active booking.");
+      console.log("User logged out → Clearing active booking.");
     bookingStore.clearBooking();
   }
 });

@@ -7,7 +7,6 @@ import { Menubar } from "primereact/menubar";
 import useAuthStore from "../hooks/useAuthStore";
 import useBookingStore from "../hooks/useBookingStore";
 import axios from "axios";
-import CarLoader from "../resusables/CarLoader";
 
 const Header = () => {
   const navigate = useNavigate();
@@ -16,87 +15,60 @@ const Header = () => {
   const authUser = useAuthStore((state) => state.authUser);
   const userId = useAuthStore((state) => state.userId);
   const loading = useAuthStore((state) => state.loading);
-  
   const activeBooking = useBookingStore((state) => state.activeBooking);
   const loadingBooking = useBookingStore((state) => state.loadingBooking);
-  const fetchActiveBooking = useBookingStore(
-    (state) => state.fetchActiveBooking
-  );
+  const fetchActiveBooking = useBookingStore((state) => state.fetchActiveBooking);
 
   useEffect(() => {
-    if (!loading && userId && !activeBooking && !loadingBooking) {
-      fetchActiveBooking();
-    }
-  }, [loading, userId, activeBooking, loadingBooking, fetchActiveBooking]);
-
-  useEffect(() => {
-    if (activeBooking) {
-      console.log("Active booking updated:", activeBooking);
-    }
-  }, [activeBooking]);
-
-
-  if (loading || loadingBooking) {
-    return <CarLoader message="Loading your profile..." />;
-  }
+    if (loading || loadingBooking) return;
+    if (!userId || activeBooking) return;
+    fetchActiveBooking();
+  }, [userId]);
 
   const onHandleLogout = async () => {
     try {
-      await axios.post(
-        `${import.meta.env.VITE_AUTH_BACKEND_URL}/signout`,
-        {},
-        { withCredentials: true }
-      );
-      // Clear auth data from store (uncomment if you have a clearAuthData function)
-      // useAuthStore.getState().clearAuthData();
+      await axios.post(`${import.meta.env.VITE_AUTH_BACKEND_URL}/signout`, {}, { withCredentials: true });
       window.location.href = "/";
     } catch (error) {
       console.error("Logout failed:", error);
     }
   };
 
-
-
   return (
-    <header className="sticky top-0 z-50 bg-black/5 backdrop-blur-md text-white shadow-md">
-      <div className="max-w-6xl mx-auto px-4 flex justify-between items-center gap-4 py-3">
-        {/* Logo */}
-        <div className="flex-shrink-0">
-          <h1
-            className="text-2xl font-bold text-yellow-400 cursor-pointer"
-            onClick={() => navigate("/")}
-          >
-            <img
-              src="/banner_logo_trans.png"
-              alt="HeavyDriver Logo"
-              className="h-12"
-            />
-          </h1>
+    <header className="sticky top-0 z-50 bg-[#0b0b0b]/70 backdrop-blur-md border-b border-gray-800 shadow-lg">
+      <div className="max-w-7xl mx-auto px-5 py-3 flex justify-between items-center">
+        {/* --- Left: Logo --- */}
+        <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate("/")}>
+          <img src="/banner_logo_trans.png" alt="Heavy Driver Logo" className="h-10 drop-shadow-md" />
+          {/* <h1 className="text-2xl font-bold text-yellow-400 hidden sm:block tracking-wide">
+            HEAVY <span className="text-white">Driver</span>
+          </h1> */}
         </div>
 
-        {/* Desktop Menu */}
-        <div className="hidden md:flex flex-grow justify-center">
+        {/* --- Center: Menu (Desktop) --- */}
+        <div className="hidden lg:flex flex-1 justify-center">
           <Menubar
             model={menuItems}
-            className="bg-transparent border-none text-yellow-400"
+            className="bg-transparent border-none text-gray-200 font-medium"
             pt={{
-              menuitem: {
-                className: "hover:text-yellow-300 text-sm",
-              },
-              submenuHeader: {
-                className: "text-yellow-300 font-semibold text-sm",
-              },
+              menuitem: { className: "hover:text-yellow-400 transition-colors duration-200 text-sm" },
+              submenuHeader: { className: "text-yellow-300 font-semibold text-sm" },
             }}
           />
         </div>
 
-        {/* Right Side Buttons (Desktop) */}
+        {/* --- Right: Buttons (Desktop) --- */}
         <div className="hidden md:flex items-center gap-3">
           <Button
             label="Engineering"
-            icon="pi pi-spin pi-cog"
-            className="p-button-sm p-button-rounded"
-            style={{ backgroundColor: "#38bdf8", color: "#000" }}
+            icon="pi pi-cog"
+            className="p-button-sm p-button-rounded font-semibold"
+            style={{
+              background: "#38bdf8",
+              color: "#000",
+              border: "none",
+              boxShadow: "0 0 10px rgba(56,189,248,0.5)",
+            }}
             onClick={() => navigate("/engineering")}
           />
 
@@ -104,67 +76,83 @@ const Header = () => {
             <Button
               label="Ongoing Ride"
               icon="pi pi-map-marker"
-              className="p-button-sm p-button-rounded"
-              style={{ backgroundColor: "#22c55e", color: "#000" }}
+              className="p-button-sm p-button-rounded font-semibold"
+              style={{
+                background: "#22c55e",
+                color: "#000",
+                border: "none",
+                boxShadow: "0 0 10px rgba(34,197,94,0.4)",
+              }}
               onClick={() => navigate(`/ride/${activeBooking}`)}
             />
           ) : (
             <Button
               label="Book a Ride"
               icon="pi pi-send"
-              className="p-button-sm p-button-rounded"
-              style={{ backgroundColor: "#facc15", color: "#000" }}
+              className="p-button-sm p-button-rounded font-semibold"
+              style={{
+                background: "#facc15",
+                color: "#000",
+                border: "none",
+                boxShadow: "0 0 10px rgba(250,204,21,0.4)",
+              }}
               onClick={() => navigate("/book")}
             />
           )}
 
-          {/* ✅ Logout Button */}
           {authUser && (
             <Button
-              label="Logout"
               icon="pi pi-sign-out"
               className="p-button-sm p-button-rounded"
-              style={{ backgroundColor: "#ef4444", color: "#fff" }}
+              style={{
+                background: "#ef4444",
+                color: "#fff",
+                border: "none",
+                boxShadow: "0 0 10px rgba(239,68,68,0.5)",
+              }}
               onClick={onHandleLogout}
             />
           )}
         </div>
 
-        {/* Mobile Menu Toggle */}
+        {/* --- Mobile Menu Toggle --- */}
         <div className="md:hidden">
           <Button
             icon="pi pi-bars"
-            className="p-button-text text-yellow-400"
+            className="p-button-rounded p-button-text text-yellow-400 hover:text-yellow-300"
             onClick={() => setMenuVisible(true)}
           />
         </div>
       </div>
 
-      {/* Mobile Menu Dialog */}
+      {/* --- Mobile Menu Dialog --- */}
       <Dialog
         visible={menuVisible}
         onHide={() => setMenuVisible(false)}
         header="Menu"
-        style={{ width: "90%" }}
         className="md:hidden"
         draggable={false}
         closable
         dismissableMask
+        style={{
+          width: "90%",
+          background: "rgba(15,15,15,0.9)",
+          color: "white",
+          borderRadius: "12px",
+        }}
       >
         <div className="flex flex-col gap-3">
           {menuItems.map((item, idx) => {
             if (item.items) {
               return (
                 <div key={idx} className="flex flex-col gap-1 pl-2">
-                  <span className="font-bold text-yellow-700">
-                    {item.label}
-                  </span>
+                  <span className="font-semibold text-yellow-500">{item.label}</span>
                   {item.items.map((subItem, subIdx) => (
                     <Button
                       key={subIdx}
                       label={subItem.label}
                       icon={subItem.icon}
-                      className="p-button-text justify-start text-yellow-600"
+                      className="p-button-text justify-start text-yellow-400"
                       onClick={() => {
                         subItem.command();
                         setMenuVisible(false);
@@ -179,7 +167,7 @@ const Header = () => {
                   key={idx}
                   label={item.label}
                   icon={item.icon}
-                  className="p-button-text justify-start text-yellow-600"
+                  className="p-button-text justify-start text-yellow-400"
                   onClick={() => {
                     item.command();
                     setMenuVisible(false);
@@ -189,47 +177,43 @@ const Header = () => {
             }
           })}
 
-          <Button
-            label="Engineering"
-            icon="pi pi-cog"
-            className="p-button-sm p-button-rounded"
-            style={{ backgroundColor: "#38bdf8", color: "#000" }}
-            onClick={() => {
-              navigate("/engineering");
-              setMenuVisible(false);
-            }}
-          />
-
-          {activeBooking ? (
+          <div className="flex flex-col gap-2 mt-4">
             <Button
-              label="Ongoing Ride"
-              icon="pi pi-map-marker"
+              label="Engineering"
+              icon="pi pi-cog"
               className="p-button-sm p-button-rounded"
-              style={{ backgroundColor: "#22c55e", color: "#000" }}
-              onClick={() => navigate(`/ride/${activeBooking}`)}
-            />
-          ) : (
-            <Button
-              label="Book a Ride"
-              icon="pi pi-send"
-              className="p-button-sm p-button-rounded"
-              style={{ backgroundColor: "#facc15", color: "#000" }}
-              onClick={() => navigate("/book")}
-            />
-          )}
-
-          {authUser && (
-            <Button
-              label="Logout"
-              icon="pi pi-sign-out"
-              className="p-button-sm p-button-rounded"
-              style={{ backgroundColor: "#ef4444", color: "#fff" }}
+              style={{ background: "#38bdf8", color: "#000" }}
               onClick={() => {
-                onHandleLogout();
+                navigate("/engineering");
                 setMenuVisible(false);
               }}
             />
-          )}
+            <Button
+              label={activeBooking ? "Ongoing Ride" : "Book a Ride"}
+              icon={activeBooking ? "pi pi-map-marker" : "pi pi-send"}
+              className="p-button-sm p-button-rounded"
+              style={{
+                background: activeBooking ? "#22c55e" : "#facc15",
+                color: "#000",
+              }}
+              onClick={() => {
+                navigate(activeBooking ? `/ride/${activeBooking}` : "/book");
+                setMenuVisible(false);
+              }}
+            />
+            {authUser && (
+              <Button
+                label="Logout"
+                icon="pi pi-sign-out"
+                className="p-button-sm p-button-rounded"
+                style={{ background: "#ef4444", color: "#fff" }}
+                onClick={() => {
+                  onHandleLogout();
+                  setMenuVisible(false);
+                }}
+              />
+            )}
+          </div>
         </div>
       </Dialog>
     </header>

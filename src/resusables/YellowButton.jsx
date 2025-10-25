@@ -4,6 +4,7 @@ const YellowButton = ({ children, onClick, className = "", type = "button" }) =>
   return (
     <button
       type={type}
+      onSubmit={onClick}
       onClick={onClick}
       className={`cursor-pointer relative bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-3 px-8 rounded shadow-md transition-all duration-200 overflow-hidden flex items-center justify-center ${className}`}
     >
