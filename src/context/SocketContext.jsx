@@ -1,28 +1,30 @@
-import React, { createContext, useContext, useEffect, useRef } from "react";
+import React, { createContext, useContext, useEffect, useRef, useState, useCallback } from "react";
 import SockJS from "sockjs-client/dist/sockjs";
 import { Client } from "@stomp/stompjs";
 import { Toast } from "primereact/toast";
 import useAuthStore from "../hooks/useAuthStore";
 
 const SocketContext = createContext(null);
-
 export const useSocket = () => useContext(SocketContext);
 
 export const SocketProvider = ({ children }) => {
   const { userId, loading } = useAuthStore();
   const stompClientRef = useRef(null);
   const toastBottomRight = useRef(null);
+  const reconnectTimeoutRef = useRef(null);
+  const [connected, setConnected] = useState(false);
 
-  useEffect(() => {
+  const connectSocket = useCallback(() => {
     if (!userId || loading) return;
+    if (stompClientRef.current) return; // Avoid duplicate connections
 
     const socket = new SockJS("http://localhost:3004/ws");
     const stompClient = new Client({
       webSocketFactory: () => socket,
-      reconnectDelay: 5000,
-      debug: (str) => console.log(str),
+      reconnectDelay: 0, // We'll handle retry manually
       onConnect: () => {
-        console.log("Connected");
+        console.log("Connected to WebSocket");
+        setConnected(true);
 
         stompClient.subscribe(`/topic/user/${userId}`, (data) => {
           const msg = JSON.parse(data.body);
@@ -42,39 +44,52 @@ export const SocketProvider = ({ children }) => {
             life: 5000,
           });
         });
-
-
-        // stompClient.subscribe(`/topic/driver/${userId}/driver-location`, (data) => {
-        //   const msg = JSON.parse(data.body);
-        //   console.log("Received location:", msg);
-
-        //   toastBottomRight.current.show({
-        //     severity: "warn",
-        //     summary: `Location received`,
-        //     detail: (
-        //       <>
-        //       <p>
-        //         {msg.latitude}, {msg.longitude}
-        //       </p>
-        //       </>
-        //     ),  
-        //     life: 5000,
-        //   });
-        // });
       },
       onStompError: (frame) => {
         console.error("Broker error:", frame.headers["message"]);
         console.error("Details:", frame.body);
+        setConnected(false);
+        attemptReconnect();
+      },
+      onWebSocketClose: () => {
+        console.warn("WebSocket closed.");
+        setConnected(false);
+        stompClientRef.current = null;
+        attemptReconnect();
       },
     });
 
     stompClient.activate();
     stompClientRef.current = stompClient;
+  }, [userId, loading]);
+
+  const attemptReconnect = useCallback(() => {
+    if (reconnectTimeoutRef.current) return; 
+
+    reconnectTimeoutRef.current = setTimeout(() => {
+      console.log("Attempting to reconnect WebSocket...");
+      reconnectTimeoutRef.current = null;
+      connectSocket();
+    }, 5000);
+  }, [connectSocket]);
+
+  useEffect(() => {
+    if (!userId || loading) return;
+
+    connectSocket();
 
     return () => {
-      stompClient.deactivate();
+      console.log("🧹 Cleaning up socket connection");
+      if (stompClientRef.current) {
+        stompClientRef.current.deactivate();
+        stompClientRef.current = null;
+      }
+      if (reconnectTimeoutRef.current) {
+        clearTimeout(reconnectTimeoutRef.current);
+        reconnectTimeoutRef.current = null;
+      }
     };
-  }, [userId, loading]);
+  }, [userId, loading, connectSocket]);
 
   return (
     <SocketContext.Provider value={stompClientRef.current}>

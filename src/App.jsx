@@ -23,11 +23,9 @@ import PublicRoute from "./components/PublicRoutes";
 import ProtectedRoutes from "./components/ProtectedRoutes";
 import MapComponent from "./components/maps/MapComponent";
 import DriverFinding from "./components/booking/DriverFinding";
-import Socket from "./components/Socket";
 import OngoingRide from "./components/booking/OngoingRide";
 import CompletedRide from "./components/booking/CompletedBooking";
 import CancelledRide from "./components/booking/CancelledBooking";
-import { SocketProvider } from "./context/SocketContext";
 
 axios.defaults.withCredentials = true;
 function App() {
@@ -35,11 +33,10 @@ function App() {
 
   useEffect(() => {
     checkAuth();
-  }, [checkAuth]);
+  }, []);
 
   return (
     <>
-      <SocketProvider>
 
       <ScrollToTop />
       
@@ -68,7 +65,6 @@ function App() {
 
           <Route path="ride/:bookingId" element={
             <ProtectedRoutes>
-              
               <OngoingRide />
             </ProtectedRoutes>
           } />
@@ -93,8 +89,6 @@ function App() {
           />
         </Route>
       </Routes>
-      </SocketProvider>
-
     </>
   );
 }

@@ -9,9 +9,11 @@ import axios from "axios";
 import { useLocationStore } from "../../hooks/useLocationStore";
 import { Toast } from "primereact/toast";
 import useAuthStore from "../../hooks/useAuthStore";
+import useBookingStore from "../../hooks/useBookingStore";
 
 const BookRide = () => {
-  const { activeBooking , userId } = useAuthStore();
+  const { userId } = useAuthStore();
+  const {activeBooking , loadingBooking} = useBookingStore();
   const [startLocation, setStartLocation] = useState(null);
   const [endLocation, setEndLocation] = useState(null);
   const [mapVisible, setMapVisible] = useState(false);
@@ -23,7 +25,8 @@ const BookRide = () => {
   const toast = useRef(null);
 
   useEffect(() => {
-    if (activeBooking) {
+    if (!loadingBooking && activeBooking) {
+      console.log(activeBooking);
       navigate(`/ride/${activeBooking}`, { replace: true });
     }
   }, [activeBooking, navigate]);
@@ -45,7 +48,7 @@ const BookRide = () => {
 }, [location?.latitude, location?.longitude]);
 
 
-  console.log(location);
+  // console.log(location);
   const handleLocationSelect = (coords) => {
     if (activeField === "start") {
       setStartLocation(coords);
@@ -75,6 +78,9 @@ const BookRide = () => {
 
     try {
       const passengerId = userId;
+      const idempotencyKey = crypto.randomUUID();
+      console.info(idempotencyKey);
+
       await axios.post(
         `${import.meta.env.VITE_BOOKING_BACKEND_URL}`,
         {
@@ -88,7 +94,12 @@ const BookRide = () => {
             longitude: endLocation.lng,
           },
         },
-        { withCredentials: true }
+
+        { withCredentials: true,
+          headers: {
+            "Idempotency-Key": idempotencyKey,
+          }
+         }
       );
 
       navigate(`/driver-finding?startLat=${startLocation.lat}&startLng=${startLocation.lng}`);

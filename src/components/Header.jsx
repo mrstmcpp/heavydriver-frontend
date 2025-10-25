@@ -1,20 +1,61 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getMenuItems } from "../content/items";
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
 import { Menubar } from "primereact/menubar";
 import useAuthStore from "../hooks/useAuthStore";
+import useBookingStore from "../hooks/useBookingStore";
+import axios from "axios";
+import CarLoader from "../resusables/CarLoader";
 
 const Header = () => {
-  const { authUser, loading , activeBooking } = useAuthStore();
   const navigate = useNavigate();
   const menuItems = getMenuItems(navigate);
   const [menuVisible, setMenuVisible] = useState(false);
-
+  const authUser = useAuthStore((state) => state.authUser);
+  const userId = useAuthStore((state) => state.userId);
+  const loading = useAuthStore((state) => state.loading);
   
+  const activeBooking = useBookingStore((state) => state.activeBooking);
+  const loadingBooking = useBookingStore((state) => state.loadingBooking);
+  const fetchActiveBooking = useBookingStore(
+    (state) => state.fetchActiveBooking
+  );
 
-  
+  useEffect(() => {
+    if (!loading && userId && !activeBooking && !loadingBooking) {
+      fetchActiveBooking();
+    }
+  }, [loading, userId, activeBooking, loadingBooking, fetchActiveBooking]);
+
+  useEffect(() => {
+    if (activeBooking) {
+      console.log("Active booking updated:", activeBooking);
+    }
+  }, [activeBooking]);
+
+
+  if (loading || loadingBooking) {
+    return <CarLoader message="Loading your profile..." />;
+  }
+
+  const onHandleLogout = async () => {
+    try {
+      await axios.post(
+        `${import.meta.env.VITE_AUTH_BACKEND_URL}/signout`,
+        {},
+        { withCredentials: true }
+      );
+      // Clear auth data from store (uncomment if you have a clearAuthData function)
+      // useAuthStore.getState().clearAuthData();
+      window.location.href = "/";
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
+  };
+
+
 
   return (
     <header className="sticky top-0 z-50 bg-black/5 backdrop-blur-md text-white shadow-md">
@@ -49,7 +90,7 @@ const Header = () => {
           />
         </div>
 
-        {/* Right Side Buttons */}
+        {/* Right Side Buttons (Desktop) */}
         <div className="hidden md:flex items-center gap-3">
           <Button
             label="Engineering"
@@ -58,6 +99,7 @@ const Header = () => {
             style={{ backgroundColor: "#38bdf8", color: "#000" }}
             onClick={() => navigate("/engineering")}
           />
+
           {activeBooking ? (
             <Button
               label="Ongoing Ride"
@@ -73,6 +115,17 @@ const Header = () => {
               className="p-button-sm p-button-rounded"
               style={{ backgroundColor: "#facc15", color: "#000" }}
               onClick={() => navigate("/book")}
+            />
+          )}
+
+          {/* ✅ Logout Button */}
+          {authUser && (
+            <Button
+              label="Logout"
+              icon="pi pi-sign-out"
+              className="p-button-sm p-button-rounded"
+              style={{ backgroundColor: "#ef4444", color: "#fff" }}
+              onClick={onHandleLogout}
             />
           )}
         </div>
@@ -164,10 +217,23 @@ const Header = () => {
               onClick={() => navigate("/book")}
             />
           )}
+
+          {authUser && (
+            <Button
+              label="Logout"
+              icon="pi pi-sign-out"
+              className="p-button-sm p-button-rounded"
+              style={{ backgroundColor: "#ef4444", color: "#fff" }}
+              onClick={() => {
+                onHandleLogout();
+                setMenuVisible(false);
+              }}
+            />
+          )}
         </div>
       </Dialog>
     </header>
   );
 };
 
-export default Header;
+export default React.memo(Header);

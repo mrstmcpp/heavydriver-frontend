@@ -55,9 +55,9 @@ const DriverFinding = () => {
     if (startLat && startLng) {
       fetchNearbyDrivers(startLat, startLng);
       const intervalId = setInterval(() => {
-        fetchNearbyDrivers(startLat, startLng);
-      }, 30000);
 
+        fetchNearbyDrivers(startLat, startLng);
+      }, 5000);
       return () => clearInterval(intervalId);
     }
   }, [startLat, startLng]);

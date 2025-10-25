@@ -4,11 +4,7 @@ import useAuthStore from "../hooks/useAuthStore";
 import CarLoader from "../resusables/CarLoader";
 
 export default function ProtectedRoutes({ children }) {
-    const { authUser, loading, checkAuth } = useAuthStore();
-
-    useEffect(() => {
-        checkAuth();
-    }, [checkAuth]);
+    const { authUser, loading } = useAuthStore();
 
     if (loading) {
         return <CarLoader message="Loading authentication status..."/>;

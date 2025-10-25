@@ -4,7 +4,6 @@ import axios from "axios";
 import MapComponent from "../maps/MapComponent";
 import { PageTopBanner } from "../PageTopBanner";
 import useAuthStore from "../../hooks/useAuthStore";
-import { stringify } from "sockjs-client/dist/sockjs";
 
 const OngoingRide = () => {
   const { bookingId } = useParams();
@@ -28,6 +27,7 @@ const OngoingRide = () => {
            }
         );
         setRide(res.data);
+        // console.log(res.data);
 
         if (res.data.bookingStatus === "COMPLETED") {
           window.location.href = `/ride/completed/${bookingId}`;
@@ -66,12 +66,12 @@ const OngoingRide = () => {
     );
   }
 
-  const { bookingStatus, driverName, driverId, startLocation, endLocation } =
+  const { bookingStatus, driverName, driverId, pickupLocation, dropoffLocation } =
     ride;
-
+  // console.log("ride : " + ride)
   const mapCenter = {
-    lat: (startLocation.latitude + endLocation.latitude) / 2,
-    lng: (startLocation.longitude + endLocation.longitude) / 2,
+    lat: (pickupLocation.latitude + dropoffLocation.latitude) / 2,
+    lng: (pickupLocation.longitude + dropoffLocation.longitude) / 2,
   };
 
   return (
@@ -135,22 +135,22 @@ const OngoingRide = () => {
               Your Route
             </h3>
             <div className="w-full rounded-xl overflow-hidden">
-              {startLocation &&
-                endLocation &&
+              {pickupLocation &&
+                dropoffLocation &&
                 (console.log(
                   "Rendering Map with locations:",
-                  startLocation,
-                  endLocation
+                  pickupLocation,
+                  dropoffLocation
                 ),
                 (
                   <MapComponent
                     origin={{
-                      lat: startLocation.latitude,
-                      lng: startLocation.longitude,
+                      lat: pickupLocation.latitude,
+                      lng: pickupLocation.longitude,
                     }}
                     destination={{
-                      lat: endLocation.latitude,
-                      lng: endLocation.longitude,
+                      lat: dropoffLocation.latitude,
+                      lng: dropoffLocation.longitude,
                     }}
                     onRouteCalculated={handleRouteCalculated}
                     center={mapCenter}

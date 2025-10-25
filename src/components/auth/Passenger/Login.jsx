@@ -19,7 +19,8 @@ const Login = () => {
         { email, password, role: "PASSENGER" }
       );
       toast.current.show({severity:'success', summary: 'Success', detail:'Login successful', life: 3000});
-      navigate("/");
+      window.location.href = "/";
+
     } catch (error) {
       console.error("Login failed:", error);
       toast.current.show({severity:'error', summary: 'Error', detail:'Login failed', life: 3000});
