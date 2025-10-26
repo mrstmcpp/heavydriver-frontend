@@ -4,14 +4,16 @@ import axios from "axios";
 import MapComponent from "../maps/MapComponent";
 import { PageTopBanner } from "../PageTopBanner";
 import useAuthStore from "../../hooks/useAuthStore";
+import useBookingStore from "../../hooks/useBookingStore";
 
 const OngoingRide = () => {
   const { bookingId } = useParams();
   const { loading, userId } = useAuthStore();
+  const {activeBooking, loadingBooking , driverLocation} = useBookingStore();
   const [ride, setRide] = useState(null);
   const [distance, setDistance] = useState(null);
   const [duration, setDuration] = useState(null);
-
+  
   useEffect(() => {
     //TODO: if user dont have active booking , he should not accesss this page
     const fetchRide = async () => {
@@ -137,11 +139,6 @@ const OngoingRide = () => {
             <div className="w-full rounded-xl overflow-hidden">
               {pickupLocation &&
                 dropoffLocation &&
-                (console.log(
-                  "Rendering Map with locations:",
-                  pickupLocation,
-                  dropoffLocation
-                ),
                 (
                   <MapComponent
                     origin={{
@@ -152,13 +149,14 @@ const OngoingRide = () => {
                       lat: dropoffLocation.latitude,
                       lng: dropoffLocation.longitude,
                     }}
+                    driverLocation={driverLocation}
                     onRouteCalculated={handleRouteCalculated}
                     center={mapCenter}
                     showDirectionsUI={false}
                     isInteractive={false}
                     height="600px"
                   />
-                ))}
+                )}
             </div>
           </div>
         </div>

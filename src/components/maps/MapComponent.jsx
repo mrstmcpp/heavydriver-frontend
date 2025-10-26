@@ -1,15 +1,39 @@
 import React, { useRef, useState, useCallback, useEffect } from "react";
-import { GoogleMap, useJsApiLoader, Marker, DirectionsRenderer } from "@react-google-maps/api";
+import {
+  GoogleMap,
+  useJsApiLoader,
+  DirectionsRenderer,
+} from "@react-google-maps/api";
 import CurrentLocationButton from "./CurrentLocationButton";
+import drivercar from "../../assets/drivercar.png";
 
-const containerStyle = { width: "100%", height: "100%", borderRadius: "0.5rem" };
+const containerStyle = {
+  width: "100%",
+  height: "100%",
+  borderRadius: "0.5rem",
+};
 const mapOptions = {
   zoomControl: true,
   streetViewControl: false,
   mapTypeControl: false,
   fullscreenControl: false,
+  mapId: "YOUR_CUSTOM_MAP_ID",
 };
 
+const autocompleteCardStyle = {
+  backgroundColor: "#000",
+  borderRadius: "3px",
+  boxShadow: "0 2px 6px rgba(0, 0, 0, 0.3)",
+  margin: "10px",
+  // padding: "5px",
+  position: "absolute",
+  top: "5%",
+  left: "50%",
+  transform: "translate(-50%, -50%)",
+  zIndex: 10,
+};
+
+const LIBRARIES = ["places", "marker"];
 const MapComponent = ({
   center,
   zoom = 12,
@@ -20,21 +44,30 @@ const MapComponent = ({
   destination,
   onRouteCalculated,
   isInteractive = true,
+  driverLocation,
+  showingYourRoute,
 }) => {
   const { isLoaded, loadError } = useJsApiLoader({
     id: "google-map-script",
     googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
+    libraries: LIBRARIES,
   });
 
   const [map, setMap] = useState(null);
   const [markerPosition, setMarkerPosition] = useState(null);
   const [directionResponse, setDirectionResponse] = useState(null);
+
   const prevRouteRef = useRef(null);
+  const autocompleteCardRef = useRef(null);
+
+  const clickedMarkerRef = useRef(null);
+  const driverMarkerRef = useRef(null);
+  const routeMarkersRef = useRef([]);
+  const selectedPlaceMarkerRef = useRef(null);
 
   const calculateRoute = useCallback(
     async (originVal, destinationVal) => {
       if (!originVal || !destinationVal) return;
-
       const prev = prevRouteRef.current;
       if (
         prev &&
@@ -54,14 +87,23 @@ const MapComponent = ({
           travelMode: window.google.maps.TravelMode.DRIVING,
         });
 
-        setDirectionResponse(results);
         setMarkerPosition(null);
-        prevRouteRef.current = { origin: originVal, destination: destinationVal };
+        if (selectedPlaceMarkerRef.current) {
+          selectedPlaceMarkerRef.current.map = null;
+        }
+
+        setDirectionResponse(results);
+        prevRouteRef.current = {
+          origin: originVal,
+          destination: destinationVal,
+        };
 
         const leg = results.routes[0].legs[0];
-
         if (onRouteCalculated) {
-          onRouteCalculated({ distance: leg.distance.text, duration: leg.duration.text });
+          onRouteCalculated({
+            distance: leg.distance.text,
+            duration: leg.duration.text,
+          });
         }
       } catch (error) {
         console.error("Error calculating route:", error);
@@ -76,25 +118,74 @@ const MapComponent = ({
   useEffect(() => {
     if (!map || !origin || !destination) return;
     if (showDirectionsUI) return;
-
     calculateRoute(origin, destination);
   }, [map, origin, destination, showDirectionsUI, calculateRoute]);
 
-  const onLoad = useCallback((mapInstance) => setMap(mapInstance), []);
-  const onUnmount = useCallback(() => setMap(null), []);
+  const onLoad = useCallback((mapInstance) => {
+    setMap(mapInstance);
+  }, []);
 
-  const placeMarker = (latLng) => {
-    setDirectionResponse(null);
-    setMarkerPosition(latLng);
-    if (onLocationSelect) {
-      onLocationSelect(latLng);
+  useEffect(() => {
+    if (!isLoaded || !map || !autocompleteCardRef.current || !window.google) {
+      return;
     }
-  };
+
+    if (autocompleteCardRef.current.hasChildNodes()) {
+      return;
+    }
+
+    selectedPlaceMarkerRef.current =
+      new window.google.maps.marker.AdvancedMarkerElement({
+        map: map,
+      });
+
+    const { PlaceAutocompleteElement } = window.google.maps.places;
+    const placeAutocomplete = new PlaceAutocompleteElement();
+    placeAutocomplete.id = "place-autocomplete-input";
+
+    autocompleteCardRef.current.appendChild(placeAutocomplete);
+
+    placeAutocomplete.addEventListener(
+      "gmp-select",
+      async ({ placePrediction }) => {
+        if (clickedMarkerRef.current) {
+          clickedMarkerRef.current.map = null;
+        }
+        setDirectionResponse(null);
+
+        const place = placePrediction.toPlace();
+        await place.fetchFields({
+          fields: ["displayName", "formattedAddress", "location", "viewport"],
+        });
+
+        if (place.viewport) {
+          map.fitBounds(place.viewport);
+        } else {
+          map.setCenter(place.location);
+          map.setZoom(17);
+        }
+
+        if (selectedPlaceMarkerRef.current) {
+          selectedPlaceMarkerRef.current.position = place.location;
+          selectedPlaceMarkerRef.current.map = map;
+        }
+      }
+    );
+  }, [isLoaded, map]);
+
+  const onUnmount = useCallback(() => setMap(null), []);
 
   const handleClick = (e) => {
     if (!isInteractive) return;
+
+    if (selectedPlaceMarkerRef.current) {
+      selectedPlaceMarkerRef.current.map = null;
+    }
+    setDirectionResponse(null);
+
     const latLng = { lat: e.latLng.lat(), lng: e.latLng.lng() };
-    placeMarker(latLng);
+    setMarkerPosition(latLng);
+    if (onLocationSelect) onLocationSelect(latLng);
   };
 
   const handleCurrentLocation = (latLng) => {
@@ -103,11 +194,70 @@ const MapComponent = ({
     map.setZoom(15);
   };
 
-  if (loadError) return <div>Error loading maps</div>;
+  useEffect(() => {
+    if (!map || !window.google) return;
+    if (clickedMarkerRef.current) {
+      clickedMarkerRef.current.map = null;
+    }
+    if (markerPosition) {
+      clickedMarkerRef.current =
+        new window.google.maps.marker.AdvancedMarkerElement({
+          map: map,
+          position: markerPosition,
+        });
+    }
+  }, [map, markerPosition]);
 
-  return isLoaded ? (
+  useEffect(() => {
+    if (!map || !window.google) return;
+    if (driverLocation) {
+      const img = document.createElement("img");
+      img.src = drivercar;
+      img.style.width = "40px";
+      img.style.height = "40px";
+      if (!driverMarkerRef.current) {
+        driverMarkerRef.current =
+          new window.google.maps.marker.AdvancedMarkerElement({
+            map: map,
+            position: driverLocation,
+            content: img,
+            title: "Driver",
+          });
+      } else {
+        driverMarkerRef.current.position = driverLocation;
+      }
+    } else if (driverMarkerRef.current) {
+      driverMarkerRef.current.map = null;
+      driverMarkerRef.current = null;
+    }
+  }, [map, driverLocation]);
+
+  useEffect(() => {
+    if (!map || !window.google) return;
+    routeMarkersRef.current.forEach((marker) => (marker.map = null));
+    routeMarkersRef.current = [];
+    if (directionResponse) {
+      const leg = directionResponse.routes[0].legs[0];
+      const startMarker = new window.google.maps.marker.AdvancedMarkerElement({
+        map: map,
+        position: leg.start_location,
+      });
+      const endMarker = new window.google.maps.marker.AdvancedMarkerElement({
+        map: map,
+        position: leg.end_location,
+      });
+      routeMarkersRef.current = [startMarker, endMarker];
+    }
+  }, [map, directionResponse]);
+
+  if (loadError) return <div>Error loading maps. Check your API key.</div>;
+  if (!isLoaded) return <div>Loading...</div>;
+
+  return (
     <div style={{ position: "relative", height, width: "100%" }}>
-      {console.log("Rendering Map with center:", center)}
+      {!showingYourRoute && (
+        <div ref={autocompleteCardRef} style={autocompleteCardStyle}></div>
+      )}
       <GoogleMap
         mapContainerStyle={containerStyle}
         center={center}
@@ -117,21 +267,20 @@ const MapComponent = ({
         onUnmount={onUnmount}
         onClick={handleClick}
       >
-        {!directionResponse && markerPosition && <Marker position={markerPosition} />}
-
         {directionResponse && (
-          <>
-            <DirectionsRenderer directions={directionResponse} options={{ suppressMarkers: true }} />
-            <Marker position={directionResponse.routes[0].legs[0].start_location} />
-            <Marker position={directionResponse.routes[0].legs[0].end_location} />
-          </>
+          <DirectionsRenderer
+            directions={directionResponse}
+            options={{ suppressMarkers: true }}
+          />
         )}
       </GoogleMap>
-      <CurrentLocationButton onLocationFound={handleCurrentLocation} />
+      
+
+      {!showingYourRoute && (
+        <CurrentLocationButton onLocationFound={handleCurrentLocation} />
+      )}
     </div>
-  ) : (
-    <div>Loading...</div>
   );
 };
 
-export default React.memo(MapComponent);
+export default MapComponent;

@@ -11,7 +11,7 @@ const CurrentLocationButton = ({ onLocationFound }) => {
   }, [location, onLocationFound]);
 
   return (
-    <div className="absolute top-4 right-4 z-10 flex flex-col items-end">
+    <div className="absolute bottom-4 right-4 z-10 flex flex-col items-end">
       <button
         onClick={getLocation}
         className="bg-yellow-500 text-black px-3 py-1 rounded shadow hover:bg-yellow-400 transition"
