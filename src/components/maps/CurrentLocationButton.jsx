@@ -1,5 +1,6 @@
 import React, { useEffect } from "react";
 import { useLocationStore } from "../../hooks/useLocationStore";
+import gpsIcon from "../../assets/gps.png";
 
 const CurrentLocationButton = ({ onLocationFound }) => {
   const { location, error, getLocation } = useLocationStore();
@@ -11,12 +12,12 @@ const CurrentLocationButton = ({ onLocationFound }) => {
   }, [location, onLocationFound]);
 
   return (
-    <div className="absolute bottom-4 right-4 z-10 flex flex-col items-end">
+    <div className="absolute bottom-4 left-4 z-10 flex flex-col items-center">
       <button
         onClick={getLocation}
-        className="bg-yellow-500 text-black px-3 py-1 rounded shadow hover:bg-yellow-400 transition"
+        className="bg-white rounded-full text-black p-1 shadow  transition"
       >
-        📍 My Location
+        <img src={gpsIcon} alt="Your Location" className="inline-block  cursor-pointer" />
       </button>
       {error && <span className="text-red-500 text-xs mt-1">{error}</span>}
     </div>

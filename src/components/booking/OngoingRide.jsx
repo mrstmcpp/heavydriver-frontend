@@ -1,10 +1,11 @@
 import React, { useEffect, useState, useCallback } from "react";
-import { useParams } from "react-router-dom";
+import { Navigate, useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import MapComponent from "../maps/MapComponent";
 import { PageTopBanner } from "../PageTopBanner";
 import useAuthStore from "../../hooks/useAuthStore";
 import useBookingStore from "../../hooks/useBookingStore";
+import { useToast } from "../../context/ToastContext";
 
 const OngoingRide = () => {
   const { bookingId } = useParams();
@@ -12,12 +13,14 @@ const OngoingRide = () => {
   const {activeBooking, loadingBooking , driverLocation} = useBookingStore();
   const [ride, setRide] = useState(null);
   const [distance, setDistance] = useState(null);
+  const {showToast} = useToast();
   const [duration, setDuration] = useState(null);
+  const navigate = useNavigate();
   
   useEffect(() => {
     //TODO: if user dont have active booking , he should not accesss this page
     const fetchRide = async () => {
-      if (loading || !userId || !bookingId) {
+      if (loading || loadingBooking || !userId || !bookingId) {
         return;
       }
       try {
@@ -25,25 +28,24 @@ const OngoingRide = () => {
           `${import.meta.env.VITE_BOOKING_BACKEND_URL}/details/${bookingId}`,
           { userId,
             role: "PASSENGER"
-
            }
         );
         setRide(res.data);
-        // console.log(res.data);
-
         if (res.data.bookingStatus === "COMPLETED") {
-          window.location.href = `/ride/completed/${bookingId}`;
+          window.location.href = `/rides/completed/${bookingId}`;
           return;
         }
 
         if (res.data.bookingStatus === "CANCELLED") {
-          window.location.href = `/ride/cancelled/${bookingId}`;
+          window.location.href = `/rides/cancelled/${bookingId}`;
           return;
         }
         // Log the ride details for debugging
-        console.log("Ride details:", res.data);
+        // console.log("Ride details:", res.data);
       } catch (err) {
-        console.error("Error fetching ride:", err);
+        showToast({ severity: 'error', summary: 'Error', detail: err.response?.data?.error || "Failed to fetch ongoing ride details." });
+        navigate("/");
+        // console.error("Error fetching ongoing ride:", err);
       }
     };
 
@@ -70,7 +72,6 @@ const OngoingRide = () => {
 
   const { bookingStatus, driverName, driverId, pickupLocation, dropoffLocation } =
     ride;
-  // console.log("ride : " + ride)
   const mapCenter = {
     lat: (pickupLocation.latitude + dropoffLocation.latitude) / 2,
     lng: (pickupLocation.longitude + dropoffLocation.longitude) / 2,
@@ -121,7 +122,6 @@ const OngoingRide = () => {
             )}
           </div>
 
-          {/* OTP Section */}
           <div className="bg-[#1a1a1a] rounded-2xl shadow-lg p-8 mb-10 text-center">
             <p className="text-lg text-gray-400 mb-2">Ride OTP</p>
             <p className="text-5xl font-extrabold tracking-widest text-yellow-400">
@@ -129,9 +129,6 @@ const OngoingRide = () => {
             </p>
           </div>
 
-          {/* Distance & Duration Card */}
-
-          {/* Map Card */}
           <div className="bg-[#1a1a1a] rounded-2xl shadow-lg p-6">
             <h3 className="text-2xl font-semibold text-yellow-400 border-b border-gray-700 pb-2 mb-4">
               Your Route
@@ -155,6 +152,7 @@ const OngoingRide = () => {
                     showDirectionsUI={false}
                     isInteractive={false}
                     height="600px"
+                    showingYourRoute={true}
                   />
                 )}
             </div>

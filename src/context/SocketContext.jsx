@@ -6,6 +6,7 @@ import React, {
   useState,
   useCallback,
 } from "react";
+import { Link, Navigate, useNavigate } from "react-router-dom";
 import SockJS from "sockjs-client/dist/sockjs";
 import { Client } from "@stomp/stompjs";
 import { Toast } from "primereact/toast";
@@ -16,6 +17,7 @@ const SocketContext = createContext(null);
 export const useSocket = () => useContext(SocketContext);
 
 export const SocketProvider = ({ children }) => {
+  const navigate = useNavigate();
   const { userId, loading: loadingAuth } = useAuthStore();
   const { activeBooking, loadingBooking } = useBookingStore();
 
@@ -45,18 +47,23 @@ export const SocketProvider = ({ children }) => {
           console.log("User notification:", msg);
 
           toastBottomRight.current?.show({
-            severity: "info",
+            severity: "success",
             summary: `Your ride is scheduled with ${msg.fullName}`,
             detail: (
-              <a
-                href={`/ride/${msg.bookingId}`}
-                className="text-yellow-400 underline hover:text-yellow-300"
-              >
-                View Ride Details
-              </a>
+              <>
+                Redirecting you to ride details.{" "}
+                <Link
+                  to={`/rides/${msg.bookingId}`}
+                  className="text-yellow-400 underline hover:text-yellow-300"
+                >
+                  View Ride Details
+                </Link>
+              </>
             ),
             life: 5000,
           });
+
+          navigate(`/rides/${msg.bookingId}`);
         });
       },
       onStompError: (frame) => {
@@ -129,7 +136,9 @@ export const SocketProvider = ({ children }) => {
     driverLocationSubRef.current = stompClient.subscribe(
       `/topic/booking/${bookingId}/driver-location`,
       (payload) => {
-        const data = JSON.parse(payload.body);
+        const data = JSON.parse(payload.body); 
+
+        //TODO: 
         const location = {
           lat: data.latitude,
           lng: data.longitude,

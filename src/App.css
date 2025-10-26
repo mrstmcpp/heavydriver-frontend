@@ -14,3 +14,8 @@
   @tailwind components;
   @tailwind utilities;
 }
+
+
+button, [role="button"], a, input[type="button"], input[type="submit"] {
+  @apply cursor-pointer;
+}

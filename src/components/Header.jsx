@@ -17,7 +17,9 @@ const Header = () => {
   const loading = useAuthStore((state) => state.loading);
   const activeBooking = useBookingStore((state) => state.activeBooking);
   const loadingBooking = useBookingStore((state) => state.loadingBooking);
-  const fetchActiveBooking = useBookingStore((state) => state.fetchActiveBooking);
+  const fetchActiveBooking = useBookingStore(
+    (state) => state.fetchActiveBooking
+  );
 
   useEffect(() => {
     if (loading || loadingBooking) return;
@@ -27,7 +29,11 @@ const Header = () => {
 
   const onHandleLogout = async () => {
     try {
-      await axios.post(`${import.meta.env.VITE_AUTH_BACKEND_URL}/signout`, {}, { withCredentials: true });
+      await axios.post(
+        `${import.meta.env.VITE_AUTH_BACKEND_URL}/signout`,
+        {},
+        { withCredentials: true }
+      );
       window.location.href = "/";
     } catch (error) {
       console.error("Logout failed:", error);
@@ -38,8 +44,15 @@ const Header = () => {
     <header className="sticky top-0 z-50 bg-[#0b0b0b]/70 backdrop-blur-md border-b border-gray-800 shadow-lg">
       <div className="max-w-7xl mx-auto px-5 py-3 flex justify-between items-center">
         {/* --- Left: Logo --- */}
-        <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate("/")}>
-          <img src="/banner_logo_trans.png" alt="Heavy Driver Logo" className="h-10 drop-shadow-md" />
+        <div
+          className="flex items-center gap-2 cursor-pointer"
+          onClick={() => navigate("/")}
+        >
+          <img
+            src="/banner_logo_trans.png"
+            alt="Heavy Driver Logo"
+            className="h-10 drop-shadow-md"
+          />
           {/* <h1 className="text-2xl font-bold text-yellow-400 hidden sm:block tracking-wide">
             HEAVY <span className="text-white">Driver</span>
           </h1> */}
@@ -51,8 +64,13 @@ const Header = () => {
             model={menuItems}
             className="bg-transparent border-none text-gray-200 font-medium"
             pt={{
-              menuitem: { className: "hover:text-yellow-400 transition-colors duration-200 text-sm" },
-              submenuHeader: { className: "text-yellow-300 font-semibold text-sm" },
+              menuitem: {
+                className:
+                  "hover:text-yellow-400 transition-colors duration-200 text-sm",
+              },
+              submenuHeader: {
+                className: "text-yellow-300 font-semibold text-sm",
+              },
             }}
           />
         </div>
@@ -73,18 +91,19 @@ const Header = () => {
           />
 
           {activeBooking ? (
-            <Button
-              label="Ongoing Ride"
-              icon="pi pi-map-marker"
-              className="p-button-sm p-button-rounded font-semibold"
-              style={{
-                background: "#22c55e",
-                color: "#000",
-                border: "none",
-                boxShadow: "0 0 10px rgba(34,197,94,0.4)",
-              }}
-              onClick={() => navigate(`/ride/${activeBooking}`)}
-            />
+              <Button
+                label="Ongoing Ride"
+                icon="pi pi-map-marker"
+                className="p-button-sm p-button-rounded font-semibold"
+                style={{
+                  background: "#22c55e",
+                  color: "#000",
+                  border: "none",
+                  boxShadow: "0 0 10px rgba(34,197,94,0.4)",
+                }}
+                onClick={() => navigate(`/rides/${activeBooking.bookingId}`)}
+              />
+              
           ) : (
             <Button
               label="Book a Ride"
@@ -96,7 +115,7 @@ const Header = () => {
                 border: "none",
                 boxShadow: "0 0 10px rgba(250,204,21,0.4)",
               }}
-              onClick={() => navigate("/book")}
+              onClick={() => navigate("/rides/new")}
             />
           )}
 
@@ -146,7 +165,9 @@ const Header = () => {
             if (item.items) {
               return (
                 <div key={idx} className="flex flex-col gap-1 pl-2">
-                  <span className="font-semibold text-yellow-500">{item.label}</span>
+                  <span className="font-semibold text-yellow-500">
+                    {item.label}
+                  </span>
                   {item.items.map((subItem, subIdx) => (
                     <Button
                       key={subIdx}
@@ -197,7 +218,7 @@ const Header = () => {
                 color: "#000",
               }}
               onClick={() => {
-                navigate(activeBooking ? `/ride/${activeBooking}` : "/book");
+                navigate(activeBooking ? `/rides/${activeBooking}` : "/rides/new");
                 setMenuVisible(false);
               }}
             />

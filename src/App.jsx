@@ -26,6 +26,7 @@ import DriverFinding from "./components/booking/DriverFinding";
 import OngoingRide from "./components/booking/OngoingRide";
 import CompletedRide from "./components/booking/CompletedBooking";
 import CancelledRide from "./components/booking/CancelledBooking";
+import GoogleMapsProvider from "./context/GoogleMapsProvider";
 
 axios.defaults.withCredentials = true;
 function App() {
@@ -51,19 +52,25 @@ function App() {
           <Route path="slidertest" element={<Slider />} />
           <Route path="maps" element={<MapComponent />} />
           <Route path="meet-the-man-behind" element={<MeetTheManBehind />} />
-          <Route path="driver-finding" element={<DriverFinding />} />
+          <Route path="driver-finding" element={
+            <GoogleMapsProvider>
+
+            <DriverFinding />
+            </GoogleMapsProvider>
+            
+            } />
 
           {/* protected routes start from here */}
-          <Route path="/ride/completed/:bookingId" element={<CompletedRide />} />
-          <Route path="/ride/cancelled/:bookingId" element={<CancelledRide />} />
+          <Route path="/rides/completed/:bookingId" element={<CompletedRide />} />
+          <Route path="/rides/cancelled/:bookingId" element={<CancelledRide />} />
 
-          <Route path="book" element={
+          <Route path="rides/new" element={
             <ProtectedRoutes>
               <BookRide />
             </ProtectedRoutes>
           } />
 
-          <Route path="ride/:bookingId" element={
+          <Route path="rides/:bookingId" element={
             <ProtectedRoutes>
               <OngoingRide />
             </ProtectedRoutes>

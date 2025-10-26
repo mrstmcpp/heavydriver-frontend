@@ -22,35 +22,31 @@ const BookRide = () => {
   const [activeField, setActiveField] = useState(null);
   const [distance, setDistance] = useState(null);
   const [duration, setDuration] = useState(null);
-  const { location, getLocation } = useLocationStore();
+  const { location, watchUserLocation, stopWatchingUserLocation } =
+    useLocationStore();
   const navigate = useNavigate();
   const toast = useRef(null);
 
   useEffect(() => {
     if (!loadingBooking && activeBooking) {
-      navigate(`/ride/${activeBooking}`, { replace: true });
+      navigate(`/rides/${activeBooking}`, { replace: true });
     }
-  }, [activeBooking, navigate]);
+  }, [activeBooking, navigate, loadingBooking]);
 
   useEffect(() => {
-    try {
-      getLocation();
-    } catch (error) {
-      toast.current.show({
-        severity: "error",
-        summary: "Error",
-        detail: "Failed to fetch location",
-        life: 3000,
-      });
-    }
-  }, []);
+    watchUserLocation();
+
+    return () => {
+      stopWatchingUserLocation();
+    };
+  }, [watchUserLocation, stopWatchingUserLocation]);
 
   const mapCenter = useMemo(() => {
-    if (location?.latitude && location?.longitude) {
-      return Object.freeze({ lat: location.latitude, lng: location.longitude });
+    if (location?.lat && location?.lng) {
+      return Object.freeze({ lat: location.lat, lng: location.lng });
     }
     return Object.freeze({ lat: 25.49249, lng: 81.85936 });
-  }, [location?.latitude, location?.longitude]);
+  }, [location]);
 
   const getAddressFromCoords = async (lat, lng) => {
     return new Promise((resolve, reject) => {
@@ -160,7 +156,7 @@ const BookRide = () => {
             </label>
             <select className="w-full bg-[#1a1a1a] text-white border border-gray-700 rounded px-4 py-3 focus:outline-none hover:border-yellow-400 transition">
               <option value="">Choose Taxi Type</option>
-              <option value="mini">Auto</option>
+              <option value="mini">Car</option>
             </select>
           </div>
 
@@ -231,7 +227,9 @@ const BookRide = () => {
       </div>
 
       <Dialog
-        header={`Select Destination Location`}
+        header={`Select ${
+          activeField === "start" ? "Start" : "Destination"
+        } Location`}
         visible={mapVisible}
         maximizable
         style={{ width: "80vw", height: "80vh" }}
@@ -241,7 +239,7 @@ const BookRide = () => {
           center={mapCenter}
           height="65vh"
           onLocationSelect={handleLocationSelect}
-          showDirectionsUI={false}
+          showDirectionsUI={true}
         />
       </Dialog>
     </div>

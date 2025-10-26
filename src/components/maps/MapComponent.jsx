@@ -6,6 +6,7 @@ import {
 } from "@react-google-maps/api";
 import CurrentLocationButton from "./CurrentLocationButton";
 import drivercar from "../../assets/drivercar.png";
+import { useLocationStore } from "../../hooks/useLocationStore";
 
 const containerStyle = {
   width: "100%",
@@ -17,7 +18,7 @@ const mapOptions = {
   streetViewControl: false,
   mapTypeControl: false,
   fullscreenControl: false,
-  mapId: "YOUR_CUSTOM_MAP_ID",
+  mapId: import.meta.env.VITE_GOOGLE_MAPS_MAP_ID,
 };
 
 const autocompleteCardStyle = {
@@ -25,7 +26,6 @@ const autocompleteCardStyle = {
   borderRadius: "3px",
   boxShadow: "0 2px 6px rgba(0, 0, 0, 0.3)",
   margin: "10px",
-  // padding: "5px",
   position: "absolute",
   top: "5%",
   left: "50%",
@@ -34,9 +34,10 @@ const autocompleteCardStyle = {
 };
 
 const LIBRARIES = ["places", "marker"];
+
 const MapComponent = ({
   center,
-  zoom = 12,
+  zoom = 15,
   height = "400px",
   onLocationSelect,
   showDirectionsUI = true,
@@ -46,12 +47,19 @@ const MapComponent = ({
   isInteractive = true,
   driverLocation,
   showingYourRoute,
+  drivers = [],
+  activeDriver = null,
+  onDriverMouseOver,
+  onDriverMouseOut,
 }) => {
   const { isLoaded, loadError } = useJsApiLoader({
     id: "google-map-script",
     googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
     libraries: LIBRARIES,
   });
+
+  const { location, watchUserLocation, stopWatchingUserLocation } =
+    useLocationStore();
 
   const [map, setMap] = useState(null);
   const [markerPosition, setMarkerPosition] = useState(null);
@@ -64,6 +72,9 @@ const MapComponent = ({
   const driverMarkerRef = useRef(null);
   const routeMarkersRef = useRef([]);
   const selectedPlaceMarkerRef = useRef(null);
+  const driverMarkersRef = useRef({});
+
+  const currentUserLocationMarkerRef = useRef(null);
 
   const calculateRoute = useCallback(
     async (originVal, destinationVal) => {
@@ -129,22 +140,17 @@ const MapComponent = ({
     if (!isLoaded || !map || !autocompleteCardRef.current || !window.google) {
       return;
     }
-
     if (autocompleteCardRef.current.hasChildNodes()) {
       return;
     }
-
     selectedPlaceMarkerRef.current =
       new window.google.maps.marker.AdvancedMarkerElement({
         map: map,
       });
-
     const { PlaceAutocompleteElement } = window.google.maps.places;
     const placeAutocomplete = new PlaceAutocompleteElement();
     placeAutocomplete.id = "place-autocomplete-input";
-
     autocompleteCardRef.current.appendChild(placeAutocomplete);
-
     placeAutocomplete.addEventListener(
       "gmp-select",
       async ({ placePrediction }) => {
@@ -152,19 +158,16 @@ const MapComponent = ({
           clickedMarkerRef.current.map = null;
         }
         setDirectionResponse(null);
-
         const place = placePrediction.toPlace();
         await place.fetchFields({
           fields: ["displayName", "formattedAddress", "location", "viewport"],
         });
-
         if (place.viewport) {
           map.fitBounds(place.viewport);
         } else {
           map.setCenter(place.location);
           map.setZoom(17);
         }
-
         if (selectedPlaceMarkerRef.current) {
           selectedPlaceMarkerRef.current.position = place.location;
           selectedPlaceMarkerRef.current.map = map;
@@ -177,22 +180,53 @@ const MapComponent = ({
 
   const handleClick = (e) => {
     if (!isInteractive) return;
-
     if (selectedPlaceMarkerRef.current) {
       selectedPlaceMarkerRef.current.map = null;
     }
     setDirectionResponse(null);
-
     const latLng = { lat: e.latLng.lat(), lng: e.latLng.lng() };
     setMarkerPosition(latLng);
     if (onLocationSelect) onLocationSelect(latLng);
   };
 
-  const handleCurrentLocation = (latLng) => {
-    if (!map) return;
-    map.panTo(latLng);
+  const handleCurrentLocation = () => {
+    if (!map || !location) return;
+    map.panTo(location);
     map.setZoom(15);
   };
+
+  useEffect(() => {
+    watchUserLocation();
+
+    return () => {
+      stopWatchingUserLocation();
+    };
+  }, [watchUserLocation, stopWatchingUserLocation]);
+
+  useEffect(() => {
+    if (!map || !window.google || !location) return;
+
+    const userDot = document.createElement("div");
+    userDot.style.width = "14px";
+    userDot.style.height = "14px";
+    userDot.style.backgroundColor = "#4285F4";
+    userDot.style.borderRadius = "50%";
+    userDot.style.border = "2px solid white";
+    userDot.style.boxShadow = "0 0 4px rgba(0,0,0,0.3)";
+    userDot.style.boxSizing = "border-box";
+
+    if (!currentUserLocationMarkerRef.current) {
+      currentUserLocationMarkerRef.current =
+        new window.google.maps.marker.AdvancedMarkerElement({
+          map: map,
+          position: location,
+          content: userDot,
+          title: "Your Location",
+        });
+    } else {
+      currentUserLocationMarkerRef.current.position = location;
+    }
+  }, [map, location]);
 
   useEffect(() => {
     if (!map || !window.google) return;
@@ -250,6 +284,59 @@ const MapComponent = ({
     }
   }, [map, directionResponse]);
 
+  useEffect(() => {
+    if (!map || !window.google) return;
+
+    const currentMarkers = driverMarkersRef.current;
+    const newMarkers = {};
+
+    drivers.forEach((driver) => {
+      const driverId = driver.driverId;
+      const isActive = activeDriver === driverId;
+      const position = {
+        lat: parseFloat(driver.latitude),
+        lng: parseFloat(driver.longitude),
+      };
+
+      const img = document.createElement("img");
+      img.src = drivercar;
+      const size = isActive ? 45 : 35;
+      img.style.width = `${size}px`;
+      img.style.height = `${size}px`;
+      img.style.transition = "width 0.1s, height 0.1s";
+
+      if (currentMarkers[driverId]) {
+        const marker = currentMarkers[driverId];
+        marker.position = position;
+        marker.content = img;
+        newMarkers[driverId] = marker;
+        delete currentMarkers[driverId];
+      } else {
+        const marker = new window.google.maps.marker.AdvancedMarkerElement({
+          map: map,
+          position: position,
+          content: img,
+          title: `Driver #${driverId}`,
+        });
+
+        marker.addListener("mouseover", () => {
+          if (onDriverMouseOver) onDriverMouseOver(driverId);
+        });
+        marker.addListener("mouseout", () => {
+          if (onDriverMouseOut) onDriverMouseOut();
+        });
+
+        newMarkers[driverId] = marker;
+      }
+    });
+
+    Object.values(currentMarkers).forEach((marker) => {
+      marker.map = null;
+    });
+
+    driverMarkersRef.current = newMarkers;
+  }, [map, drivers, activeDriver, onDriverMouseOver, onDriverMouseOut]);
+
   if (loadError) return <div>Error loading maps. Check your API key.</div>;
   if (!isLoaded) return <div>Loading...</div>;
 
@@ -274,10 +361,9 @@ const MapComponent = ({
           />
         )}
       </GoogleMap>
-      
 
       {!showingYourRoute && (
-        <CurrentLocationButton onLocationFound={handleCurrentLocation} />
+        <CurrentLocationButton onClick={handleCurrentLocation} />
       )}
     </div>
   );
