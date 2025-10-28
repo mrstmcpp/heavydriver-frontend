@@ -25,7 +25,7 @@ const OngoingRide = () => {
       }
       try {
         const res = await axios.post(
-          `${import.meta.env.VITE_BOOKING_BACKEND_URL}/details/${bookingId}`,
+          `${import.meta.env.VITE_BOOKING_BACKEND_URL}/details/${activeBooking.bookingId}`,
           { userId,
             role: "PASSENGER"
            }

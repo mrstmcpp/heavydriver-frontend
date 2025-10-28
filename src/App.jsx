@@ -1,23 +1,23 @@
 import { Routes, Route } from "react-router-dom";
 import React, { useEffect } from "react";
 import axios from "axios";
-import HomePage from "./pages/Homepage";
+import HomePage from "./static/Homepage";
 import Layout from "./layout/Layout";
 import "./App.css";
 import "primereact/resources/themes/viva-dark/theme.css";
 import "primereact/resources/primereact.min.css";
 import "primeicons/primeicons.css";
-import About from "./pages/About";
-import Contact from "./pages/Contact";
-import Engineering from "./pages/Engineering";
-import FAQ from "./pages/FAQ";
-import NotFound from "./pages/404";
+import About from "./static/About";
+import Contact from "./static/Contact";
+import Engineering from "./static/Engineering";
+import FAQ from "./static/FAQ";
+import NotFound from "./static/404";
 import BookRide from "./components/booking/BookRide";
 import Login from "./components/auth/Passenger/Login";
 import Register from "./components/auth/Passenger/Register";
 import Slider from "./components/slider/Slider";
 import ScrollToTop from "./resusables/ScrollToTop";
-import MeetTheManBehind from "./pages/MeetTheManBehind";
+import MeetTheManBehind from "./static/MeetTheManBehind";
 import useAuthStore from "./hooks/useAuthStore";
 import PublicRoute from "./components/PublicRoutes";
 import ProtectedRoutes from "./components/ProtectedRoutes";
@@ -27,6 +27,8 @@ import OngoingRide from "./components/booking/OngoingRide";
 import CompletedRide from "./components/booking/CompletedBooking";
 import CancelledRide from "./components/booking/CancelledBooking";
 import GoogleMapsProvider from "./context/GoogleMapsProvider";
+import PassengerProfilePage from "./components/Passenger/Profile";
+import PassengerRides from "./components/Passenger/Rides";
 
 axios.defaults.withCredentials = true;
 function App() {
@@ -63,10 +65,20 @@ function App() {
           {/* protected routes start from here */}
           <Route path="/rides/completed/:bookingId" element={<CompletedRide />} />
           <Route path="/rides/cancelled/:bookingId" element={<CancelledRide />} />
-
+          <Route path="rides/all" element={
+            <ProtectedRoutes>
+              <PassengerRides />
+            </ProtectedRoutes>
+          } />
           <Route path="rides/new" element={
             <ProtectedRoutes>
               <BookRide />
+            </ProtectedRoutes>
+          } />
+
+          <Route path="profile" element={
+            <ProtectedRoutes>
+              <PassengerProfilePage />
             </ProtectedRoutes>
           } />
 

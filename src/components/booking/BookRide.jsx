@@ -137,7 +137,7 @@ const BookRide = () => {
   };
 
   return (
-    <div className="bg-black min-h-screen text-white">
+    <div className="bg-black text-white">
       <PageTopBanner section="Book a Ride" />
       <Toast ref={toast} />
 
