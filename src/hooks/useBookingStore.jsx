@@ -13,6 +13,10 @@ const useBookingStore = create((set, get) => ({
     set({ driverLocation: location });
   },
 
+  setActiveBooking: (data) => {
+    set({ activeBooking: data });
+  },
+
   fetchActiveBooking: async () => {
     const { loadingBooking } = get();
     if (loadingBooking) return;

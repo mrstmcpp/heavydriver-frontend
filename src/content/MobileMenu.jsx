@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useState} from "react";
 import { Dialog } from "primereact/dialog";
 import { Button } from "primereact/button";
 import { getMenuItems } from "./MenuItems";
@@ -12,12 +12,16 @@ const MobileMenu = ({
   authUser,
   onLogout,
 }) => {
+  const [profileVisible, setProfileVisible] = useState(false);
   const menuItems = getMenuItems(navigate);
 
   return (
     <Dialog
       visible={visible}
-      onHide={() => setVisible(false)}
+      onHide={() => {
+        setVisible(false);
+        setProfileVisible(false);
+      }}
       header="Menu"
       className="md:hidden"
       draggable={false}
@@ -32,14 +36,24 @@ const MobileMenu = ({
       }}
     >
       <div className="flex flex-col gap-4">
-
         {/* Profile Section */}
         {authUser && (
-          <div className="flex items-center gap-3 p-3 bg-gray-800 rounded-xl border border-gray-700">
+          <div
+            onClick={() => setProfileVisible((v) => !v)}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) =>
+              (e.key === "Enter" || e.key === " ") &&
+              setProfileVisible((v) => !v)
+            }
+            className="flex items-center gap-3 p-3 bg-gray-800 rounded-xl border border-gray-700 w-full cursor-pointer"
+          >
             <ProfileMenu
               authUser={authUser}
               onLogout={onLogout}
               navigate={navigate}
+              visible={profileVisible}
+              onHide={() => setProfileVisible(false)}
             />
             <div className="flex flex-col">
               <span className="font-semibold text-yellow-400">
@@ -66,7 +80,7 @@ const MobileMenu = ({
                       key={subIdx}
                       label={sub.label}
                       icon={sub.icon}
-                      className="w-full justify-start text-left bg-gray-800 hover:bg-gray-700 border-none text-gray-200 py-3 rounded-lg"
+                      className="w-full justify-start text-left bg-yellow-400 hover:bg-gray-700 border-none text-gray-200 py-3 rounded-lg"
                       onClick={() => {
                         sub.command();
                         setVisible(false);
@@ -78,7 +92,7 @@ const MobileMenu = ({
                 <Button
                   label={item.label}
                   icon={item.icon}
-                  className="w-full justify-start text-left bg-gray-800 hover:bg-gray-700 border-none text-gray-200 py-3 rounded-lg"
+                  className="w-full justify-start text-left bg-yellow-400 hover:bg-gray-700 border-none text-gray-200 py-3 rounded-lg"
                   onClick={() => {
                     item.command();
                     setVisible(false);

@@ -9,9 +9,9 @@ export const getMenuItems = (navigate) => [
     icon: 'pi pi-compass',
     items: [
       {
-        label: '404',
-        icon: 'pi pi-times-circle',
-        command: () => navigate('/404')
+        label: 'Engineering',
+        icon: 'pi pi-cog',
+        command: () => navigate('/engineering')
       },
       {
         label: 'FAQ',
@@ -19,10 +19,10 @@ export const getMenuItems = (navigate) => [
         command: () => navigate('/faq')
       },
       {
-        label: 'Engineering',
-        icon: 'pi pi-cog',
-        command: () => navigate('/engineering')
-      }
+        label: '404',
+        icon: 'pi pi-times-circle',
+        command: () => navigate('/404')
+      },
     ]
   },
   {

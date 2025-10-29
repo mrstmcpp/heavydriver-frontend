@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from "react";
-import { Navigate, useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import MapComponent from "../maps/MapComponent";
 import { PageTopBanner } from "../PageTopBanner";
@@ -8,59 +8,96 @@ import useBookingStore from "../../hooks/useBookingStore";
 import { useToast } from "../../context/ToastContext";
 
 const OngoingRide = () => {
-  const { bookingId } = useParams();
-  const { loading, userId } = useAuthStore();
-  const {activeBooking, loadingBooking , driverLocation} = useBookingStore();
+  const { bookingId: bookingIdParam } = useParams();
+  const { loading: authLoading, userId } = useAuthStore();
+  const { activeBooking, loadingBooking, driverLocation } = useBookingStore();
   const [ride, setRide] = useState(null);
   const [distance, setDistance] = useState(null);
-  const {showToast} = useToast();
   const [duration, setDuration] = useState(null);
+  const { showToast } = useToast();
   const navigate = useNavigate();
-  
+
+  // prefer activeBooking.bookingId, otherwise use URL param
+  const bookingIdToUse = activeBooking?.bookingId || bookingIdParam;
+  const bookingStatusFromStore = activeBooking?.bookingStatus;
+
   useEffect(() => {
-    //TODO: if user dont have active booking , he should not accesss this page
+    // if still loading auth
+    if (authLoading || loadingBooking) return;
+
+    // if we have bookingStatus in store, redirect early for final states
+    if (bookingStatusFromStore === "COMPLETED") {
+      if (bookingIdToUse) navigate(`/rides/${bookingIdToUse}/details`);
+      else navigate("/");
+      return;
+    }
+    if (bookingStatusFromStore === "CANCELLED") {
+      if (bookingIdToUse) navigate(`/rides/${bookingIdToUse}/details`);
+      else navigate("/");
+      return;
+    }
+
+    // require a booking id to fetch
+    if (!bookingIdToUse) {
+      // no booking send them away
+      navigate("/");
+      return;
+    }
+
+    let cancelled = false;
     const fetchRide = async () => {
-      if (loading || loadingBooking || !userId || !bookingId) {
-        return;
-      }
       try {
         const res = await axios.post(
-          `${import.meta.env.VITE_BOOKING_BACKEND_URL}/details/${activeBooking.bookingId}`,
-          { userId,
-            role: "PASSENGER"
-           }
+          `${import.meta.env.VITE_BOOKING_BACKEND_URL}/details/${bookingIdToUse}`,
+          {
+            userId,
+            role: "PASSENGER",
+          }
         );
-        setRide(res.data);
-        if (res.data.bookingStatus === "COMPLETED") {
-          window.location.href = `/rides/completed/${bookingId}`;
-          return;
-        }
 
-        if (res.data.bookingStatus === "CANCELLED") {
-          window.location.href = `/rides/cancelled/${bookingId}`;
+        if (cancelled) return;
+
+        const data = res.data;
+        setRide(data);
+
+        if (data.bookingStatus === "COMPLETED") {
+          navigate(`/rides/${bookingIdToUse}/details`);
           return;
         }
-        // Log the ride details for debugging
-        // console.log("Ride details:", res.data);
+        if (data.bookingStatus === "CANCELLED") {
+          navigate(`/rides/${bookingIdToUse}/details`);
+          return;
+        }
       } catch (err) {
-        showToast({ severity: 'error', summary: 'Error', detail: err.response?.data?.error || "Failed to fetch ongoing ride details." });
+        showToast({
+          severity: "error",
+          summary: "Error",
+          detail:
+            err.response?.data?.error || "Failed to fetch ongoing ride details.",
+        });
         navigate("/");
-        // console.error("Error fetching ongoing ride:", err);
       }
     };
 
     fetchRide();
-  }, [bookingId , loading]);
 
-  const handleRouteCalculated = useCallback(
-    (dist, time) => {
-      if (dist !== distance || time !== duration) {
-        setDistance(dist);
-        setDuration(time);
-      }
-    },
-    [distance, duration]
-  );
+    return () => {
+      cancelled = true;
+    };
+  }, [
+    bookingIdToUse,
+    bookingStatusFromStore,
+    authLoading,
+    loadingBooking,
+    userId,
+    navigate,
+    showToast,
+  ]);
+
+  const handleRouteCalculated = useCallback((dist, time) => {
+    setDistance((prev) => (prev !== dist ? dist : prev));
+    setDuration((prev) => (prev !== time ? time : prev));
+  }, []);
 
   if (!ride) {
     return (
@@ -70,24 +107,27 @@ const OngoingRide = () => {
     );
   }
 
-  const { bookingStatus, driverName, driverId, pickupLocation, dropoffLocation } =
-    ride;
-  const mapCenter = {
-    lat: (pickupLocation.latitude + dropoffLocation.latitude) / 2,
-    lng: (pickupLocation.longitude + dropoffLocation.longitude) / 2,
-  };
+  const {
+    bookingStatus,
+    driverName,
+    driverId,
+    pickupLocation,
+    dropoffLocation,
+  } = ride;
+
+  const mapCenter =
+    pickupLocation && dropoffLocation
+      ? {
+          lat: (pickupLocation.latitude + dropoffLocation.latitude) / 2,
+          lng: (pickupLocation.longitude + dropoffLocation.longitude) / 2,
+        }
+      : null;
 
   return (
     <>
       <PageTopBanner section="Ongoing Ride" />
       <div className="bg-black text-white py-16 px-6 sm:px-12 lg:px-24">
         <div className="max-w-5xl mx-auto">
-          {/* Title */}
-          {/* <h2 className="text-3xl font-bold text-yellow-400 mb-10 text-center">
-          Ride Details
-        </h2> */}
-
-          {/* Driver Details Card */}
           <div className="bg-[#1a1a1a] rounded-2xl shadow-lg p-6 mb-10 flex flex-col sm:flex-row gap-6 items-center">
             <img
               src={`/drivers/driver.png`}
@@ -102,9 +142,7 @@ const OngoingRide = () => {
                 </span>
               </p>
               <p className="text-2xl font-bold mt-2">{driverName}</p>
-              <p className="text-sm text-gray-400 mt-1">
-                🆔 Driver ID: {driverId}
-              </p>
+              <p className="text-sm text-gray-400 mt-1">🆔 Driver ID: {driverId}</p>
               <p className="text-sm text-gray-400">🚗 Car No: UP65 AB 1234</p>
             </div>
 
@@ -134,27 +172,29 @@ const OngoingRide = () => {
               Your Route
             </h3>
             <div className="w-full rounded-xl overflow-hidden">
-              {pickupLocation &&
-                dropoffLocation &&
-                (
-                  <MapComponent
-                    origin={{
-                      lat: pickupLocation.latitude,
-                      lng: pickupLocation.longitude,
-                    }}
-                    destination={{
-                      lat: dropoffLocation.latitude,
-                      lng: dropoffLocation.longitude,
-                    }}
-                    driverLocation={driverLocation}
-                    onRouteCalculated={handleRouteCalculated}
-                    center={mapCenter}
-                    showDirectionsUI={false}
-                    isInteractive={false}
-                    height="600px"
-                    showingYourRoute={true}
-                  />
-                )}
+              {pickupLocation && dropoffLocation && mapCenter ? (
+                <MapComponent
+                  origin={{
+                    lat: pickupLocation.latitude,
+                    lng: pickupLocation.longitude,
+                  }}
+                  destination={{
+                    lat: dropoffLocation.latitude,
+                    lng: dropoffLocation.longitude,
+                  }}
+                  driverLocation={driverLocation}
+                  onRouteCalculated={handleRouteCalculated}
+                  center={mapCenter}
+                  showDirectionsUI={false}
+                  isInteractive={false}
+                  height="600px"
+                  showingYourRoute={true}
+                />
+              ) : (
+                <div className="p-8 text-center text-gray-400">
+                  Route unavailable — pickup or dropoff location missing.
+                </div>
+              )}
             </div>
           </div>
         </div>

@@ -55,7 +55,7 @@ const DesktopMenu = ({ navigate, activeBooking, authUser, onLogout }) => {
         ) : (
           <Button
             label="Book a Ride"
-            icon="pi pi-send"
+            icon="pi pi-car"
             className="p-button-sm p-button-rounded font-semibold"
             style={{
               background: "#facc15",

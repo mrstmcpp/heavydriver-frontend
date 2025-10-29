@@ -27,12 +27,12 @@ const ProfileMenu = ({ authUser, onLogout, navigate }) => {
   ];
 
   return (
-    <div className="relative">
+    <div className="relative" onClick={(e) => menuRef.current.toggle(e)}>
       <img
         src={authUser.profilePic || user}
         alt="User Avatar"
         className="h-10 w-10 rounded-full border-2 border-yellow-400 cursor-pointer hover:scale-105 transition-transform"
-        onClick={(e) => menuRef.current.toggle(e)}
+        
       />
       <Menu
         model={items}

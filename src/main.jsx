@@ -11,11 +11,11 @@ ReactDOM.createRoot(document.getElementById("root")).render(
   // <React.StrictMode>
   <BrowserRouter>
     <PrimeReactProvider>
-      <SocketProvider>
-        <ToastProvider>
+      <ToastProvider>
+        <SocketProvider>
           <App />
-        </ToastProvider>
-      </SocketProvider>
+        </SocketProvider>
+      </ToastProvider>
     </PrimeReactProvider>
   </BrowserRouter>
   /* </React.StrictMode> */
