@@ -30,7 +30,6 @@ export const SocketProvider = ({ children }) => {
 
   const [connected, setConnected] = useState(false);
 
-  // ✅ Connect socket once per app lifetime
   const connectSocket = useCallback(() => {
     if (!userId || loadingAuth || stompClientRef.current) return;
 
@@ -39,13 +38,13 @@ export const SocketProvider = ({ children }) => {
       webSocketFactory: () => socket,
       reconnectDelay: 0,
       onConnect: () => {
-        console.log("✅ Connected to WebSocket for user:", userId);
+        console.log("Connected to WebSocket for user:", userId);
         setConnected(true);
 
         // Subscribe to user-level notifications (ride assigned)
         stompClient.subscribe(`/topic/user/${userId}`, (data) => {
           const msg = JSON.parse(data.body);
-          console.log("📩 User notification received:", msg);
+          console.log("User notification received:", msg);
 
           toastBottomRight.current?.show({
             severity: "success",
@@ -73,12 +72,12 @@ export const SocketProvider = ({ children }) => {
         });
       },
       onStompError: () => {
-        console.error("❌ STOMP error occurred");
+        console.error("STOMP error occurred");
         setConnected(false);
         attemptReconnect();
       },
       onWebSocketClose: () => {
-        console.warn("⚠️ WebSocket connection closed.");
+        console.warn("WebSocket connection closed.");
         setConnected(false);
         stompClientRef.current = null;
         driverLocationSubRef.current = null;
@@ -93,22 +92,21 @@ export const SocketProvider = ({ children }) => {
     stompClientRef.current = stompClient;
   }, [userId, loadingAuth, navigate]);
 
-  // 🔁 Reconnect only if connection drops
+  // reconnect only if connection drops
   const attemptReconnect = useCallback(() => {
     if (reconnectTimeoutRef.current) return;
     reconnectTimeoutRef.current = setTimeout(() => {
-      console.log("🔁 Attempting to reconnect WebSocket...");
+      console.log("Attempting to reconnect WebSocket...");
       reconnectTimeoutRef.current = null;
       connectSocket();
     }, 5000);
   }, [connectSocket]);
 
-  // 🧠 Keep socket connected for lifetime of app
+  // keep socket connected for lifetime of app
   useEffect(() => {
     if (!userId || loadingAuth) return;
     connectSocket();
 
-    // ❌ Don't deactivate socket here; it should persist globally
     return () => {
       if (reconnectTimeoutRef.current) {
         clearTimeout(reconnectTimeoutRef.current);
@@ -117,7 +115,6 @@ export const SocketProvider = ({ children }) => {
     };
   }, [userId, loadingAuth, connectSocket]);
 
-  // 📡 Manage booking-specific subscriptions
   useEffect(() => {
     const stompClient = stompClientRef.current;
     const bookingId = activeBooking?.bookingId;
@@ -125,9 +122,8 @@ export const SocketProvider = ({ children }) => {
 
     if (!connected || !stompClient || loadingBooking) return;
 
-    // 🧹 Unsubscribe when booking ends (but keep socket)
     if (status === "COMPLETED" || status === "CANCELLED") {
-      console.log(`🧹 Ride ${status}: unsubscribing from ride topics`);
+      console.log(`Ride ${status}: unsubscribing from ride topics`);
       if (driverLocationSubRef.current) {
         try {
           driverLocationSubRef.current.unsubscribe();
@@ -146,9 +142,8 @@ export const SocketProvider = ({ children }) => {
       return;
     }
 
-    // 🆕 Subscribe when bookingId changes
     if (bookingId && bookingId !== currentBookingIdRef.current) {
-      console.log(`🔄 Booking changed: ${currentBookingIdRef.current} → ${bookingId}`);
+      console.log(`Booking changed: ${currentBookingIdRef.current} → ${bookingId}`);
 
       // cleanup old subscriptions
       if (driverLocationSubRef.current) {
@@ -165,34 +160,34 @@ export const SocketProvider = ({ children }) => {
       }
 
       // subscribe to new driver-location
-      console.log(`📡 Subscribing to driver-location for booking ${bookingId}`);
+      console.log(`Subscribing to driver-location for booking ${bookingId}`);
       driverLocationSubRef.current = stompClient.subscribe(
         `/topic/booking/${bookingId}/driver-location`,
         (payload) => {
           const data = JSON.parse(payload.body);
           const location = { lat: data.latitude, lng: data.longitude };
-          console.log("📍 Driver location update received:", location);
+          console.log("Driver location update received:", location);
           useBookingStore.getState().setDriverLocation(location);
         }
       );
 
       // subscribe to booking updates
-      console.log(`📡 Subscribing to booking-updates for booking ${bookingId}`);
+      console.log(`Subscribing to booking-updates for booking ${bookingId}`);
       bookingUpdateSubRef.current = stompClient.subscribe(
         `/topic/booking/${bookingId}/updates`,
         (payload) => {
           const data = JSON.parse(payload.body);
-          console.log("🔔 Booking update received:", data);
+          console.log("Booking update received:", data);
 
           useBookingStore.getState().setActiveBooking({
             bookingId,
-            bookingStatus: data.status,
+            bookingStatus: data.bookingStatus,
           });
 
           toastBottomRight.current?.show({
             severity: "info",
             summary: "Ride Update",
-            detail: `Booking status changed to ${data.status}`,
+            detail: `Booking status changed to ${data.bookingStatus}`,
             life: 4000,
           });
         }
@@ -202,9 +197,8 @@ export const SocketProvider = ({ children }) => {
     }
   }, [activeBooking, connected, loadingBooking]);
 
-  // 🔒 Explicit disconnect (used during logout)
   const disconnectSocket = useCallback(() => {
-    console.log("🚪 Disconnecting WebSocket manually (logout)");
+    console.log("Disconnecting WebSocket manually (logout)");
     try {
       driverLocationSubRef.current?.unsubscribe();
       bookingUpdateSubRef.current?.unsubscribe();
@@ -220,7 +214,6 @@ export const SocketProvider = ({ children }) => {
     setConnected(false);
   }, []);
 
-  // 🔓 Handle logout + socket close
   const handleLogout = useCallback(() => {
     disconnectSocket();
     logout(); // from auth store

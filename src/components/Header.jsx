@@ -7,7 +7,7 @@ import axios from "axios";
 
 import Logo from "../content/Logo";
 import DesktopMenu from "../content/DesktopMenu";
-import ProfileMenu from "../content/ProfileMenu";
+
 import MobileMenu from "../content/MobileMenu";
 
 const Header = () => {

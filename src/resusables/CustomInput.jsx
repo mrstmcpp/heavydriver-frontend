@@ -1,19 +1,21 @@
+import React from "react";
 import { FloatLabel } from "primereact/floatlabel";
 import { Password } from "primereact/password";
-import React from "react";
 
 const CustomInput = ({
   id,
   type = "text",
   label,
   icon,
-  value,
+  value = "",
   onChange,
   className = "",
   readOnly = false,
 }) => {
   const baseStyle =
     "bg-[#1a1a1a] text-white text-sm border border-gray-700 rounded-md px-3 py-3 pr-10 w-full";
+
+  const hasValue = value !== null && value !== undefined && value !== "";
 
   return (
     <div className="relative mb-4 w-full">
@@ -30,8 +32,7 @@ const CustomInput = ({
             pt={{
               root: { className: "w-full" },
               input: {
-                className:
-                  "!text-sm !leading-none !p-0 !px-3 !py-3",
+                className: "!text-sm !leading-none !p-0 !px-3 !py-3",
               },
               toggleMask: {
                 className:
@@ -46,13 +47,20 @@ const CustomInput = ({
             type={type}
             value={value}
             onChange={onChange}
-            className={`${baseStyle} ${className}`}
-            placeholder=" " // space so FloatLabel works
+            className={`${baseStyle} ${className} ${
+              readOnly ? "cursor-default" : ""
+            }`}
+            placeholder={hasValue ? label : " "} // key fix for FloatLabel behavior
             readOnly={readOnly}
           />
         )}
 
-        <label htmlFor={id} className="text-gray-400 text-sm">
+        <label
+          htmlFor={id}
+          className={`text-gray-400 text-sm ${
+            hasValue ? "transform scale-90 -translate-y-4" : ""
+          }`}
+        >
           {label}
         </label>
 

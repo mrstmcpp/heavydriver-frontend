@@ -17,15 +17,12 @@ const OngoingRide = () => {
   const { showToast } = useToast();
   const navigate = useNavigate();
 
-  // prefer activeBooking.bookingId, otherwise use URL param
   const bookingIdToUse = activeBooking?.bookingId || bookingIdParam;
   const bookingStatusFromStore = activeBooking?.bookingStatus;
 
   useEffect(() => {
-    // if still loading auth
     if (authLoading || loadingBooking) return;
 
-    // if we have bookingStatus in store, redirect early for final states
     if (bookingStatusFromStore === "COMPLETED") {
       if (bookingIdToUse) navigate(`/rides/${bookingIdToUse}/details`);
       else navigate("/");

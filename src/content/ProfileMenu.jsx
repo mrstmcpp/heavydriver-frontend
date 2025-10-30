@@ -2,27 +2,35 @@ import React, { useRef } from "react";
 import { Menu } from "primereact/menu";
 import user from "../assets/user64.png";
 
-const ProfileMenu = ({ authUser, onLogout, navigate }) => {
+const ProfileMenu = ({ authUser, onLogout, navigate, setMenuVisible }) => {
   const menuRef = useRef(null);
+  const handleClick = (command) => {
+    command();
+    if (setMenuVisible) setMenuVisible(false);
+  };
 
   const items = [
     {
       label: "My Profile",
       icon: "pi pi-user",
-      command: () => navigate("/profile"),
+      command: () => handleClick(() => navigate("/profile")),
     },
-    { label: "My Rides", icon: "pi pi-car", command: () => navigate("/rides/all") },
+    {
+      label: "My Rides",
+      icon: "pi pi-car",
+      command: () => handleClick(() => navigate("/rides/all")),
+    },
     {
       label: "Settings",
       icon: "pi pi-cog",
-      command: () => navigate("/settings"),
+      command: () => handleClick(() => navigate("/settings")),
     },
     { separator: true },
     {
       label: "Logout",
       icon: "pi pi-sign-out",
       command: onLogout,
-        className: "text-red"
+      className: "text-red",
     },
   ];
 
@@ -32,7 +40,6 @@ const ProfileMenu = ({ authUser, onLogout, navigate }) => {
         src={authUser.profilePic || user}
         alt="User Avatar"
         className="h-10 w-10 rounded-full border-2 border-yellow-400 cursor-pointer hover:scale-105 transition-transform"
-        
       />
       <Menu
         model={items}

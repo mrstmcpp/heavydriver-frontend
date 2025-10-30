@@ -10,20 +10,26 @@ import { useLocationStore } from "../../hooks/useLocationStore";
 import { Toast } from "primereact/toast";
 import useAuthStore from "../../hooks/useAuthStore";
 import useBookingStore from "../../hooks/useBookingStore";
+import CarTypeSelector from "./CarTypeSelector";
+import CarLoader from "../../resusables/CarLoader";
 
 const BookRide = () => {
   const { userId } = useAuthStore();
   const { activeBooking, loadingBooking } = useBookingStore();
+
   const [startLocation, setStartLocation] = useState(null);
   const [endLocation, setEndLocation] = useState(null);
   const [startAddress, setStartAddress] = useState("");
   const [endAddress, setEndAddress] = useState("");
   const [mapVisible, setMapVisible] = useState(false);
   const [activeField, setActiveField] = useState(null);
-  const [distance, setDistance] = useState(null);
-  const [duration, setDuration] = useState(null);
+  const [carType, setCarType] = useState("");
+  const [fareDetails, setFareDetails] = useState(null);
+  const [fetchingFare, setFetchingFare] = useState(false);
+
   const { location, watchUserLocation, stopWatchingUserLocation } =
     useLocationStore();
+
   const navigate = useNavigate();
   const toast = useRef(null);
 
@@ -35,10 +41,7 @@ const BookRide = () => {
 
   useEffect(() => {
     watchUserLocation();
-
-    return () => {
-      stopWatchingUserLocation();
-    };
+    return () => stopWatchingUserLocation();
   }, [watchUserLocation, stopWatchingUserLocation]);
 
   const mapCenter = useMemo(() => {
@@ -48,45 +51,15 @@ const BookRide = () => {
     return Object.freeze({ lat: 25.49249, lng: 81.85936 });
   }, [location]);
 
-  const getAddressFromCoords = async (lat, lng) => {
-    return new Promise((resolve, reject) => {
-      if (!window.google || !window.google.maps) {
-        reject("Google Maps JS SDK not loaded");
-        return;
-      }
-
-      const geocoder = new window.google.maps.Geocoder();
-      const latlng = { lat: parseFloat(lat), lng: parseFloat(lng) };
-
-      geocoder.geocode({ location: latlng }, (results, status) => {
-        if (status === "OK" && results[0]) {
-          resolve(results[0].formatted_address);
-        } else {
-          console.error("Geocoder failed due to:", status);
-          resolve("Unknown location");
-        }
-      });
-    });
-  };
-
-  const handleLocationSelect = async (coords) => {
-    const address = await getAddressFromCoords(coords.lat, coords.lng);
-
+  const handleLocationSelect = (coords) => {
     if (activeField === "start") {
       setStartLocation(coords);
-      setStartAddress(address);
+      setStartAddress("Start location selected");
     } else if (activeField === "end") {
       setEndLocation(coords);
-      setEndAddress(address);
+      setEndAddress("End location selected");
     }
     setMapVisible(false);
-  };
-
-  const handleRouteCalculated = (results) => {
-    if (results) {
-      setDistance(results.distance);
-      setDuration(results.duration);
-    }
   };
 
   const openMapFor = (field) => {
@@ -94,9 +67,76 @@ const BookRide = () => {
     setMapVisible(true);
   };
 
+  const fetchFareEstimate = async () => {
+    if (!startLocation || !endLocation || !carType) {
+      toast.current?.show({
+        severity: "warn",
+        summary: "Incomplete Data",
+        detail: "Please select start, end, and car type first.",
+      });
+      return;
+    }
+
+    try {
+      setFetchingFare(true);
+      setFareDetails(null);
+
+      const payload = {
+        startLocation: {
+          latitude: Number(startLocation.lat),
+          longitude: Number(startLocation.lng),
+        },
+        endLocation: {
+          latitude: Number(endLocation.lat),
+          longitude: Number(endLocation.lng),
+        },
+        carType: carType.toUpperCase(),
+      };
+
+      const response = await axios.post(
+        `${import.meta.env.VITE_BOOKING_BACKEND_URL}/fare/estimate`,
+        payload,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+          withCredentials: true,
+        }
+      );
+
+      const { distance, duration, fare, startAddress, endAddress } =
+        response.data;
+
+      setFareDetails({ distance, duration, fare });
+      setStartAddress(startAddress);
+      setEndAddress(endAddress);
+
+      toast.current?.show({
+        severity: "success",
+        summary: "Fare Estimated",
+        detail: "Fare details fetched successfully!",
+      });
+    } catch (error) {
+      toast.current?.show({
+        severity: "error",
+        summary: "Error",
+        detail:
+          error?.response?.data?.message ||
+          "Failed to fetch fare estimate. Check console for details.",
+      });
+    } finally {
+      setFetchingFare(false);
+    }
+  };
+
+  useEffect(() => {
+    setFareDetails(null);
+  }, [startLocation, endLocation, carType]);
+
   const handleBooking = async () => {
-    if (!startLocation || !endLocation) {
-      alert("Please fill all fields before booking.");
+    if (!startLocation || !endLocation || !fareDetails) {
+      alert("Please get fare estimate before booking.");
       return;
     }
 
@@ -104,7 +144,7 @@ const BookRide = () => {
       const passengerId = userId;
       const idempotencyKey = crypto.randomUUID();
 
-      await axios.post(
+      const res = await axios.post(
         `${import.meta.env.VITE_BOOKING_BACKEND_URL}`,
         {
           passengerId,
@@ -118,30 +158,46 @@ const BookRide = () => {
             longitude: endLocation.lng,
             address: endAddress,
           },
+          carType,
         },
         {
           withCredentials: true,
           headers: {
             "Idempotency-Key": idempotencyKey,
+            "Content-Type": "application/json",
           },
         }
       );
 
+      const bookingId = res.data?.bookingId;
+      if (!bookingId) {
+        throw new Error("No booking ID returned from server.");
+      }
+
       navigate(
-        `/driver-finding?startLat=${startLocation.lat}&startLng=${startLocation.lng}`
+        `/driver-finding?startLat=${startLocation.lat}&startLng=${startLocation.lng}`,
+        {
+          state: { bookingId },
+        }
       );
     } catch (error) {
-      console.error("Booking failed:", error);
       alert("Booking failed, please try again.");
     }
   };
 
   return (
-    <div className="bg-black text-white">
+    <div className="bg-black text-white relative">
       <PageTopBanner section="Book a Ride" />
       <Toast ref={toast} />
 
-      <div className="max-w-3xl mx-auto bg-[#0f0f0f] p-8 rounded-2xl shadow-lg mt-10 mb-10 border border-gray-800">
+      {/* Loader Overlay */}
+      {fetchingFare && (
+        <div className="absolute inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50">
+          <CarLoader message="Loading fare estimate" />
+        </div>
+      )}
+
+      <div className="max-w-3xl mx-auto bg-[#0f0f0f] p-8 rounded-2xl shadow-lg mt-10 mb-10 border border-gray-800 relative z-10">
         <h2 className="text-4xl font-bold mb-2 text-yellow-400">
           Book Your Taxi Ride!
         </h2>
@@ -150,15 +206,7 @@ const BookRide = () => {
         </p>
 
         <div className="space-y-8">
-          <div>
-            <label className="block text-sm mb-1 text-gray-400">
-              Taxi Type
-            </label>
-            <select className="w-full bg-[#1a1a1a] text-white border border-gray-700 rounded px-4 py-3 focus:outline-none hover:border-yellow-400 transition">
-              <option value="">Choose Taxi Type</option>
-              <option value="mini">Car</option>
-            </select>
-          </div>
+          <CarTypeSelector carType={carType} setCarType={setCarType} />
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div onClick={() => openMapFor("start")} className="cursor-pointer">
@@ -179,49 +227,75 @@ const BookRide = () => {
             </div>
           </div>
 
-          {startLocation && endLocation && (
+          {fareDetails && (
             <div className="space-y-4">
               <h3 className="text-2xl font-semibold text-yellow-400 border-b border-gray-700 pb-2">
-                Your Route
+                Ride Estimate
               </h3>
-              <div className="h-64 md:h-80 w-full">
+              <div className="grid grid-cols-2 gap-4 text-center bg-[#1a1a1a] p-4 rounded-lg">
+                <div>
+                  <p className="text-sm text-gray-400">Pickup Address</p>
+                  <p className="text-xl font-bold">{startAddress}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-400">Drop-off Address</p>
+                  <p className="text-xl font-bold">{endAddress}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-400">Est. Distance</p>
+                  <p className="text-xl font-bold">{fareDetails.distance} km</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-400">Est. Time</p>
+                  <p className="text-xl font-bold">
+                    {fareDetails.duration} min
+                  </p>
+                </div>
+                <div className="col-span-2">
+                  <p className="text-sm text-gray-400">Est. Fare</p>
+                  <p className="text-2xl font-bold text-yellow-400">
+                    ₹{fareDetails.fare.toFixed(2)}
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {startLocation && endLocation && (
+            <div className="mt-6">
+              <h3 className="text-2xl font-semibold text-yellow-400 border-b border-gray-700 pb-2">
+                Route Preview
+              </h3>
+              <div className="h-64 md:h-80 w-full mt-3 rounded-lg overflow-hidden">
                 <MapComponent
                   origin={startLocation}
                   destination={endLocation}
-                  onRouteCalculated={handleRouteCalculated}
-                  center={mapCenter}
+                  center={startLocation}
                   showDirectionsUI={false}
                   isInteractive={false}
                   height="100%"
                   showingYourRoute={true}
                 />
               </div>
-
-              {distance && duration && (
-                <div className="grid grid-cols-2 gap-4 text-center bg-[#1a1a1a] p-4 rounded-lg">
-                  <div>
-                    <p className="text-sm text-gray-400">Pickup Address</p>
-                    <p className="text-xl font-bold">{startAddress}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-400">Drop-off Address</p>
-                    <p className="text-xl font-bold">{endAddress}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-400">Est. Distance</p>
-                    <p className="text-xl font-bold">{distance}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-400">Est. Time</p>
-                    <p className="text-xl font-bold">{duration}</p>
-                  </div>
-                </div>
-              )}
             </div>
           )}
 
-          <div className="pt-2">
-            <YellowButton onClick={handleBooking}>Create Booking</YellowButton>
+          <div className="flex flex-col sm:flex-row gap-4 pt-4">
+            <YellowButton
+              onClick={fetchFareEstimate}
+              disabled={
+                !startLocation || !endLocation || !carType || fetchingFare
+              }
+            >
+              {fetchingFare ? "Fetching Fare..." : "Get Fare Estimate"}
+            </YellowButton>
+
+            <YellowButton
+              onClick={handleBooking}
+              disabled={!fareDetails || fetchingFare}
+            >
+              Create Booking
+            </YellowButton>
           </div>
         </div>
       </div>

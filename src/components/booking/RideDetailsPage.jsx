@@ -15,6 +15,8 @@ const PassengerRideDetails = () => {
   const [isFetching, setIsFetching] = useState(true);
   const [error, setError] = useState("");
   const [showMap, setShowMap] = useState(false);
+  const [startLocation , setStartLocation] = useState("");
+
 
   useEffect(() => {
     if (authLoading) return;
@@ -34,6 +36,7 @@ const PassengerRideDetails = () => {
         );
 
         setRide(res.data);
+        setStartLocation(res.data.pickupLocation);
         console.log("Passenger ride details fetched:", res.data);
       } catch (err) {
         console.error("Error fetching ride details:", err);
@@ -61,6 +64,13 @@ const PassengerRideDetails = () => {
         ...prev,
         bookingStatus: res.data?.bookingStatus || prev.bookingStatus,
       }));
+
+      navigate(
+        `/driver-finding?startLat=${startLocation.latitude}&startLng=${startLocation.longitude}`,
+        {
+          state: { bookingId },
+        }
+      );
     } catch (err) {
       console.error("Retry driver assignment failed:", err);
       setError(

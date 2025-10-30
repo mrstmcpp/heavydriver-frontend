@@ -51,6 +51,7 @@ const MobileMenu = ({
             <ProfileMenu
               authUser={authUser}
               onLogout={onLogout}
+              setMenuVisible={setVisible}
               navigate={navigate}
               visible={profileVisible}
               onHide={() => setProfileVisible(false)}
