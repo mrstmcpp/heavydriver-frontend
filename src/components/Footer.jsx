@@ -1,5 +1,4 @@
-import { Button } from "primereact/button";
-import { Divider } from "primereact/divider";
+
 import YellowButton from "../resusables/YellowButton";
 
 const Footer = () => {

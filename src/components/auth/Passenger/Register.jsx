@@ -3,6 +3,7 @@ import { useState } from "react";
 import CustomInput from "../../../resusables/CustomInput";
 import YellowButton from "../../../resusables/YellowButton";
 import axios from "axios";
+import PageMeta from "../../common/PageMeta";
 
 const Register = () => {
   const [name, setName] = useState("");
@@ -32,6 +33,8 @@ const Register = () => {
   };
 
   return (
+    <>
+    <PageMeta page={"register"} />
     <div className="min-h-screen flex items-center justify-center bg-black px-4 py-8">
       <div className="bg-[#111] p-8 space-y-4 rounded-lg w-full max-w-md shadow-md">
         <h2 className="text-3xl font-bold text-yellow-400 mb-6 text-center">
@@ -90,6 +93,7 @@ const Register = () => {
         </p>
       </div>
     </div>
+    </>
   );
 };
 

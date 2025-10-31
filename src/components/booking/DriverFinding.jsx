@@ -9,6 +9,7 @@ import { useSocket } from "../../context/SocketContext";
 import MapComponent from "../maps/MapComponent";
 import CarLoader from "../../resusables/CarLoader";
 import userProfilePage from "../../assets/user.png";
+import PageMeta from "../common/PageMeta";
 
 const DriverFinding = () => {
   const navigate = useNavigate();
@@ -137,6 +138,8 @@ const DriverFinding = () => {
   const showLoader = loadingRide || retryingDriver;
 
   return (
+    <>
+    <PageMeta page={"driverFinding"} />
     <div className="relative flex flex-col items-center bg-[#0e0e0e] min-h-screen py-6 overflow-hidden">
       <Toast ref={toast} />
 
@@ -145,10 +148,10 @@ const DriverFinding = () => {
           <CarLoader
             message={
               retryingDriver
-                ? "Retrying driver assignment..."
-                : "Loading ride details..."
+              ? "Retrying driver assignment..."
+              : "Loading ride details..."
             }
-          />
+            />
         </div>
       )}
 
@@ -165,7 +168,7 @@ const DriverFinding = () => {
             showingYourRoute={true}
             onDriverMouseOver={(driverId) => setActiveDriver(driverId)}
             onDriverMouseOut={() => setActiveDriver(null)}
-          />
+            />
         </div>
       )}
 
@@ -177,7 +180,7 @@ const DriverFinding = () => {
               src={userProfilePage}
               alt={ride.driverName}
               className="w-24 h-24 rounded-full border-4 border-yellow-400 object-cover"
-            />
+              />
             <div className="flex-1 text-center sm:text-left">
               <div className="flex items-center justify-center sm:justify-start gap-2 mb-1">
                 {ride.bookingStatus === "COMPLETED" ? (
@@ -212,10 +215,10 @@ const DriverFinding = () => {
                     disabled={retryingDriver}
                     className={`flex items-center gap-2 py-2 px-5 rounded-full border transition-all ${
                       retryingDriver
-                        ? "bg-gray-700 text-gray-400 cursor-not-allowed"
-                        : "border-yellow-400 text-yellow-400 hover:bg-yellow-400 hover:text-black"
+                      ? "bg-gray-700 text-gray-400 cursor-not-allowed"
+                      : "border-yellow-400 text-yellow-400 hover:bg-yellow-400 hover:text-black"
                     }`}
-                  >
+                    >
                     {retryingDriver ? (
                       <>
                         <i className="pi pi-spin pi-spinner" /> Retrying...
@@ -257,6 +260,7 @@ const DriverFinding = () => {
         </div>
       )}
     </div>
+      </>
   );
 };
 

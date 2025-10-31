@@ -16,11 +16,12 @@ const BookingsTable = ({ bookings = [], loading }) => {
       minute: "2-digit",
     });
 
-  const fareTemplate = () => (
-    <span className="text-yellow-500">
-      ₹{Math.floor(Math.random() * 300) + 100}
-    </span>
-  );
+  const fareTemplate = (rowData) => {
+    if (rowData.fare === null || rowData.fare === undefined) {
+      return <span className="text-gray-400 italic">Not available</span>;
+    }
+    return <span className="text-yellow-400 font-semibold">₹{rowData.fare}</span>;
+  };
 
   const statusTemplate = (rowData) => {
     let colorClass = "text-gray-400";
@@ -31,7 +32,7 @@ const BookingsTable = ({ bookings = [], loading }) => {
 
   const actionTemplate = (rowData) => (
     <Button
-      label=""
+      label="View"
       icon="pi pi-eye"
       className="p-button-sm p-button-outlined p-button-secondary"
       onClick={() => navigate(`/rides/${rowData.bookingId}/details`)}
@@ -39,7 +40,7 @@ const BookingsTable = ({ bookings = [], loading }) => {
   );
 
   return (
-    <div className="border shadow-md">
+    <div className="rounded-lg overflow-hidden shadow-md border border-gray-700">
       <DataTable
         value={bookings}
         loading={loading}
@@ -49,9 +50,15 @@ const BookingsTable = ({ bookings = [], loading }) => {
       >
         <Column field="bookingId" header="ID" sortable style={{ width: "10%" }} />
         <Column header="Date" body={dateTemplate} sortable style={{ width: "20%" }} />
-        <Column header="Fare" body={fareTemplate} style={{ width: "10%" }} />
-        <Column field="status" header="Status" body={statusTemplate} sortable style={{ width: "15%" }} />
-        <Column body={actionTemplate} header="Action" style={{ width: "5%" }} />
+        <Column header="Fare" body={fareTemplate} sortable style={{ width: "10%" }} />
+        <Column
+          field="status"
+          header="Status"
+          body={statusTemplate}
+          sortable
+          style={{ width: "15%" }}
+        />
+        <Column body={actionTemplate} header="Action" style={{ width: "10%" }} />
       </DataTable>
     </div>
   );

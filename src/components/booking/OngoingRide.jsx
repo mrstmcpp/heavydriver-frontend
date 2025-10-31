@@ -6,6 +6,7 @@ import { PageTopBanner } from "../PageTopBanner";
 import useAuthStore from "../../hooks/useAuthStore";
 import useBookingStore from "../../hooks/useBookingStore";
 import { useToast } from "../../context/ToastContext";
+import PageMeta from "../common/PageMeta";
 
 const OngoingRide = () => {
   const { bookingId: bookingIdParam } = useParams();
@@ -83,6 +84,7 @@ const OngoingRide = () => {
     };
   }, [
     bookingIdToUse,
+    activeBooking,
     bookingStatusFromStore,
     authLoading,
     loadingBooking,
@@ -122,6 +124,7 @@ const OngoingRide = () => {
 
   return (
     <>
+    <PageMeta page={"activeRide"} />
       <PageTopBanner section="Ongoing Ride" />
       <div className="bg-black text-white py-16 px-6 sm:px-12 lg:px-24">
         <div className="max-w-5xl mx-auto">

@@ -1,10 +1,12 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { PageTopBanner } from "../components/PageTopBanner";
+import PageMeta from "../components/common/PageMeta";
 
 const MeetTheManBehind = () => {
   return (
     <div className="bg-black text-yellow-400 min-h-screen">
+      <PageMeta page={"meetFounder"} />
       {/* Top Banner */}
       <PageTopBanner section="Meet the Man Behind" />
 

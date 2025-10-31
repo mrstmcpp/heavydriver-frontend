@@ -12,6 +12,7 @@ import useAuthStore from "../../hooks/useAuthStore";
 import useBookingStore from "../../hooks/useBookingStore";
 import CarTypeSelector from "./CarTypeSelector";
 import CarLoader from "../../resusables/CarLoader";
+import PageMeta from "../common/PageMeta";
 
 const BookRide = () => {
   const { userId } = useAuthStore();
@@ -187,6 +188,7 @@ const BookRide = () => {
 
   return (
     <div className="bg-black text-white relative">
+      <PageMeta page={"bookRide"} />
       <PageTopBanner section="Book a Ride" />
       <Toast ref={toast} />
 
@@ -258,6 +260,10 @@ const BookRide = () => {
                   </p>
                 </div>
               </div>
+              <p className="text-sm text-gray-500 italic text-center mt-2">
+                *Note: The estimated fare may vary based on traffic, route
+                changes, and waiting time.*
+              </p>
             </div>
           )}
 

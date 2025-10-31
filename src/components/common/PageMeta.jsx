@@ -1,9 +1,8 @@
-import React from "react";
 import { Helmet } from "react-helmet-async";
-import { seoConfig } from "../../utils/seoConfig.jsx";
+import { seoConfigPassenger } from "../../utils/seoConfig";
 
 const PageMeta = ({ page }) => {
-  const meta = seoConfig[page] || seoConfig.homepage;
+  const meta = seoConfigPassenger[page] || seoConfigPassenger.homepage;
 
   return (
     <Helmet>

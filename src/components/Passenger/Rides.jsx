@@ -6,6 +6,7 @@ import CarLoader from "../../resusables/CarLoader";
 import BookingsTable from "../../resusables/BookingsTable";
 import useAuthStore from "../../hooks/useAuthStore";
 import { PageTopBanner } from "../PageTopBanner";
+import PageMeta from "../common/PageMeta";
 
 const PassengerRides = () => {
   const { authUser, loading: authLoading } = useAuthStore();
@@ -43,6 +44,7 @@ const PassengerRides = () => {
       );
 
       const data = response.data;
+      console.log("Fetched passenger bookings:", data);
       setBookings(data.bookingList || []);
       setTotalItems(data.totalItems || 0);
     } catch (err) {
@@ -80,6 +82,8 @@ const PassengerRides = () => {
 
   return (
     <>
+      <PageMeta page={"myRides"}/>
+
       <PageTopBanner section="My Rides" />
       <div className="bg-gray-900 text-yellow-400 flex justify-center">
         <div className="w-full max-w-6xl py-10 px-6">

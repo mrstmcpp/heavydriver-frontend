@@ -11,13 +11,9 @@ const Layout = () => {
       <Header />
 
       <Outlet />
-      {/* for rendering parent content */}
       <ScrollTop
-        icon="pi pi-arrow-up text-white"
-        className="bg-yellow-500 text-black hover:bg-yellow-600 transition-colors duration-300"
-        style={{
-          backgroundColor: "#facc15",
-        }}
+        icon={<i className="pi pi-arrow-up text-black text-lg" />}
+        className="!bg-yellow-500 hover:!bg-yellow-600 transition-colors duration-300"
       />
       <Footer />
     </div>

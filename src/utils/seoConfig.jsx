@@ -59,14 +59,30 @@ export const seoConfigPassenger = {
     description:
       "Track your ongoing ride in real time. Stay informed about your route, fare, and driver details with HeavyDriver.",
   },
-  offers: {
-    title: "Offers | HeavyDriver — Save More on Every Ride",
-    description:
-      "Explore the latest offers and discounts available for HeavyDriver passengers. Ride more, pay less!",
-  },
   notFound: {
     title: "404 — Page Not Found | HeavyDriver",
     description:
       "The page you’re looking for doesn’t exist. Go back to HeavyDriver and continue your journey seamlessly.",
+  },
+
+  driverFinding: {
+    title: "Driver Finding | HeavyDriver — Connecting You with the Right Driver",
+    description:
+      "Discover how HeavyDriver’s intelligent matching algorithm connects passengers with the most suitable drivers based on proximity, ratings, and driving history.",
+  },
+  engineering: {
+    title: "Engineering | HeavyDriver — The Technology Behind Seamless Travel",
+    description:
+      "Explore the engineering excellence that powers HeavyDriver — from route optimization and AI-based driver allocation to secure payment systems and real-time tracking.",
+  },
+  meetFounder: {
+    title: "Meet the Founder | HeavyDriver — The Vision Behind Smarter Mobility",
+    description:
+      "Get to know the story and vision of HeavyDriver’s founder — the inspiration, challenges, and innovation driving a safer, more reliable travel experience for everyone.",
+  },
+  faq: {
+    title: "FAQ | HeavyDriver — Frequently Asked Questions",
+    description:
+      "Find answers to common questions about booking rides, payments, cancellations, and safety policies. Get all the details you need to ride confidently with HeavyDriver.",
   },
 };

@@ -1,9 +1,11 @@
 import React from "react";
 import pageImg from '../assets/page2.jpg';
 import { PageTopBanner } from "../components/PageTopBanner";
+import PageMeta from "../components/common/PageMeta";
 const About = () => {
   return (
     <div className="">
+      <PageMeta page={"about"} />
       {/* Banner Image */}
       <PageTopBanner section="About Us" />
 

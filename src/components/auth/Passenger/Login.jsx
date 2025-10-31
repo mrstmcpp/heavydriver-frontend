@@ -4,6 +4,7 @@ import YellowButton from "../../../resusables/YellowButton";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { Toast } from 'primereact/toast';
+import PageMeta from "../../common/PageMeta";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -28,6 +29,8 @@ const Login = () => {
   };
 
   return (
+    <>
+    <PageMeta page={"login"} />
     <div className="min-h-screen flex items-center justify-center bg-black px-4">
       <div className="bg-[#111] p-8 rounded-lg w-full max-w-md shadow-md">
         <h2 className="text-3xl font-bold text-yellow-400 mb-6 text-center">
@@ -67,6 +70,8 @@ const Login = () => {
         </p>
       </div>
     </div>
+    </>
+
   );
 };
 

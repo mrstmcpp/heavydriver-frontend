@@ -3,6 +3,7 @@ import { PageTopBanner } from "../components/PageTopBanner";
 import CustomInput from "../resusables/CustomInput";
 import OutlinedButton from "../resusables/OutlinedButton";
 import YellowButton from "../resusables/YellowButton";
+import PageMeta from "../components/common/PageMeta";
 
 const Contact = () => {
   const [formData, setFormData] = useState({
@@ -34,6 +35,7 @@ const Contact = () => {
 
   return (
     <div>
+      <PageMeta page={"support"} />
       <PageTopBanner section="Contact Us" />
 
       <section className="bg-black text-white py-16 px-6 sm:px-12 lg:px-24">

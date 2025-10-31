@@ -1,8 +1,7 @@
 import React from "react";
 
 const carTypes = [
-  { value: "SEDAN", label: "Sedan" },
-  { value: "AUTO", label: "AUTO" },
+  { value: "BIKE", label: "BIKE" },
 ];
 
 const CarTypeSelector = ({ carType, setCarType }) => {

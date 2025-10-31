@@ -6,6 +6,7 @@ import defaultDP from "../../assets/user.png";
 import YellowButton from "../../resusables/YellowButton";
 import { PageTopBanner } from "../PageTopBanner";
 import { InfoCard } from "../../resusables/InfoCard";
+import PageMeta from "../common/PageMeta";
 
 const PassengerProfilePage = () => {
   const [loading, setLoading] = useState(true);
@@ -42,6 +43,7 @@ const PassengerProfilePage = () => {
 
   return (
     <div>
+      <PageMeta page={"profile"} />
       <PageTopBanner section="Profile" />
 
       <div className="bg-gradient-to-b from-gray-950 via-gray-900 to-gray-950 text-gray-100 py-12">

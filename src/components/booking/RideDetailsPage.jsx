@@ -4,6 +4,7 @@ import axios from "axios";
 import useAuthStore from "../../hooks/useAuthStore";
 import userProfilePage from "../../assets/user.png";
 import { PageTopBanner } from "../PageTopBanner";
+import PageMeta from "../common/PageMeta";
 // import DriverMap from "../maps/DriverMap"; // Uncomment when map component ready
 
 const PassengerRideDetails = () => {
@@ -136,6 +137,7 @@ const PassengerRideDetails = () => {
 
   return (
     <>
+    <PageMeta page={"rideDetails"} />
       <PageTopBanner section="Ride Details" />
 
       <div className="bg-gray-900 text-yellow-400 flex justify-center">
