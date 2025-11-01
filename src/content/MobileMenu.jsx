@@ -3,17 +3,19 @@ import { Dialog } from "primereact/dialog";
 import { Button } from "primereact/button";
 import { getMenuItems } from "./MenuItems";
 import ProfileMenu from "./ProfileMenu";
+import useBookingStore from "../hooks/useBookingStore";
 
 const MobileMenu = ({
   visible,
   setVisible,
-  activeBooking,
   navigate,
   authUser,
   onLogout,
 }) => {
   const [profileVisible, setProfileVisible] = useState(false);
   const menuItems = getMenuItems(navigate);
+  const activeBooking = useBookingStore((state) => state.activeBooking);
+
 
   return (
     <Dialog

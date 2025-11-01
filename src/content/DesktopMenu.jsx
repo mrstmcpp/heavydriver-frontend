@@ -3,10 +3,12 @@ import { Menubar } from "primereact/menubar";
 import { Button } from "primereact/button";
 import { getMenuItems } from "./MenuItems";
 import ProfileMenu from "./ProfileMenu";
+import useBookingStore from "../hooks/useBookingStore";
 
-const DesktopMenu = ({ navigate, activeBooking, authUser, onLogout }) => {
+const DesktopMenu = ({ navigate, authUser, onLogout }) => {
   const menuItems = getMenuItems(navigate);
 
+  const activeBooking = useBookingStore((state) => state.activeBooking);
   return (
     <>
       <div className="hidden lg:flex flex-1 justify-center">

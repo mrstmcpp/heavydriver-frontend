@@ -24,16 +24,20 @@ const OngoingRide = () => {
   useEffect(() => {
     if (authLoading || loadingBooking) return;
 
-    if (bookingStatusFromStore === "COMPLETED") {
-      if (bookingIdToUse) navigate(`/rides/${bookingIdToUse}/details`);
-      else navigate("/");
-      return;
-    }
-    if (bookingStatusFromStore === "CANCELLED") {
-      if (bookingIdToUse) navigate(`/rides/${bookingIdToUse}/details`);
-      else navigate("/");
-      return;
-    }
+    // if (bookingStatusFromStore === "COMPLETED") {
+    //       useBookingStore.getState().clearBooking();
+
+    //   if (bookingIdToUse) navigate(`/rides/${bookingIdToUse}/details`);
+    //   else navigate("/");
+    //   return;
+    // }
+    // if (bookingStatusFromStore === "CANCELLED") {
+    //       useBookingStore.getState().clearBooking();
+
+    //   if (bookingIdToUse) navigate(`/rides/${bookingIdToUse}/details`);
+    //   else navigate("/");
+    //   return;
+    // }
 
     // require a booking id to fetch
     if (!bookingIdToUse) {
@@ -46,7 +50,9 @@ const OngoingRide = () => {
     const fetchRide = async () => {
       try {
         const res = await axios.post(
-          `${import.meta.env.VITE_BOOKING_BACKEND_URL}/details/${bookingIdToUse}`,
+          `${
+            import.meta.env.VITE_BOOKING_BACKEND_URL
+          }/details/${bookingIdToUse}`,
           {
             userId,
             role: "PASSENGER",
@@ -58,12 +64,14 @@ const OngoingRide = () => {
         const data = res.data;
         setRide(data);
 
-        if (data.bookingStatus === "COMPLETED") {
-          navigate(`/rides/${bookingIdToUse}/details`);
-          return;
-        }
-        if (data.bookingStatus === "CANCELLED") {
-          navigate(`/rides/${bookingIdToUse}/details`);
+        const status = data.bookingStatus?.toUpperCase();
+
+        if (status === "COMPLETED" || status === "CANCELLED") {
+          // console.log("Ride completed — clearing booking");
+          const id = bookingIdToUse;
+          // console.log("clearing : " + id);
+          useBookingStore.getState().clearBooking();
+          navigate(`/rides/${id}/details`);
           return;
         }
       } catch (err) {
@@ -71,7 +79,8 @@ const OngoingRide = () => {
           severity: "error",
           summary: "Error",
           detail:
-            err.response?.data?.error || "Failed to fetch ongoing ride details.",
+            err.response?.data?.error ||
+            "Failed to fetch ongoing ride details.",
         });
         navigate("/");
       }
@@ -93,6 +102,7 @@ const OngoingRide = () => {
     showToast,
   ]);
 
+  // is used to receive route information (distance and duration) back from your map once it’s calculated.
   const handleRouteCalculated = useCallback((dist, time) => {
     setDistance((prev) => (prev !== dist ? dist : prev));
     setDuration((prev) => (prev !== time ? time : prev));
@@ -124,8 +134,8 @@ const OngoingRide = () => {
 
   return (
     <>
-    <PageMeta page={"activeRide"} />
-      <PageTopBanner section="Ongoing Ride" />
+      <PageMeta page={"activeRide"} />
+      <PageTopBanner section="Active Ride" />
       <div className="bg-black text-white py-16 px-6 sm:px-12 lg:px-24">
         <div className="max-w-5xl mx-auto">
           <div className="bg-[#1a1a1a] rounded-2xl shadow-lg p-6 mb-10 flex flex-col sm:flex-row gap-6 items-center">
@@ -142,8 +152,10 @@ const OngoingRide = () => {
                 </span>
               </p>
               <p className="text-2xl font-bold mt-2">{driverName}</p>
-              <p className="text-sm text-gray-400 mt-1">🆔 Driver ID: {driverId}</p>
-              <p className="text-sm text-gray-400">🚗 Car No: UP65 AB 1234</p>
+              <p className="text-sm text-gray-400 mt-1">
+                🆔 Driver ID: {driverId}
+              </p>
+              <p className="text-sm text-gray-400"> Vehicle No: UP54 AB 1234</p>
             </div>
 
             {distance && duration && (

@@ -23,7 +23,7 @@ import PublicRoute from "./components/PublicRoutes";
 import ProtectedRoutes from "./components/ProtectedRoutes";
 import MapComponent from "./components/maps/MapComponent";
 import DriverFinding from "./components/booking/DriverFinding";
-import OngoingRide from "./components/booking/OngoingRide";
+import ActiveRide from "./components/booking/ActiveRide";
 import CompletedRide from "./components/booking/CompletedBooking";
 import CancelledRide from "./components/booking/CancelledBooking";
 import GoogleMapsProvider from "./context/GoogleMapsProvider";
@@ -91,7 +91,7 @@ function App() {
 
           <Route path="rides/:bookingId" element={
             <ProtectedRoutes>
-              <OngoingRide />
+              <ActiveRide />
             </ProtectedRoutes>
           } />
       

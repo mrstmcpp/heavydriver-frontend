@@ -63,6 +63,8 @@ const useBookingStore = create((set, get) => ({
   },
 
   clearBooking: () => {
+    const { activeBooking } = get();
+    // console.log("clearing active booking" + activeBooking.bookingId);
     set({ activeBooking: null, loadingBooking: false , driverLocation: null });
   },
 }));

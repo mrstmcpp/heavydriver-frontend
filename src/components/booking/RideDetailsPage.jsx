@@ -5,7 +5,7 @@ import useAuthStore from "../../hooks/useAuthStore";
 import userProfilePage from "../../assets/user.png";
 import { PageTopBanner } from "../PageTopBanner";
 import PageMeta from "../common/PageMeta";
-// import DriverMap from "../maps/DriverMap"; // Uncomment when map component ready
+import MapComponent from "../maps/MapComponent";
 
 const PassengerRideDetails = () => {
   const { authUser, loading: authLoading } = useAuthStore();
@@ -16,8 +16,7 @@ const PassengerRideDetails = () => {
   const [isFetching, setIsFetching] = useState(true);
   const [error, setError] = useState("");
   const [showMap, setShowMap] = useState(false);
-  const [startLocation , setStartLocation] = useState("");
-
+  const [startLocation, setStartLocation] = useState("");
 
   useEffect(() => {
     if (authLoading) return;
@@ -135,9 +134,16 @@ const PassengerRideDetails = () => {
     });
   };
 
+  const mapCenter =
+    pickupLocation && dropoffLocation
+      ? {
+          lat: (pickupLocation.latitude + dropoffLocation.latitude) / 2,
+          lng: (pickupLocation.longitude + dropoffLocation.longitude) / 2,
+        }
+      : null;
   return (
     <>
-    <PageMeta page={"rideDetails"} />
+      <PageMeta page={"rideDetails"} />
       <PageTopBanner section="Ride Details" />
 
       <div className="bg-gray-900 text-yellow-400 flex justify-center">
@@ -321,11 +327,27 @@ const PassengerRideDetails = () => {
 
             {showMap && (
               <div className="mt-6 rounded-xl overflow-hidden border border-gray-800">
-                {/* <DriverMap
-                  pickup={pickupLocation}
-                  dropoff={dropoffLocation}
-                  rideStatus={bookingStatus}
-                /> */}
+                {pickupLocation && dropoffLocation && mapCenter ? (
+                  <MapComponent
+                    origin={{
+                      lat: pickupLocation.latitude,
+                      lng: pickupLocation.longitude,
+                    }}
+                    destination={{
+                      lat: dropoffLocation.latitude,
+                      lng: dropoffLocation.longitude,
+                    }}
+                    center={mapCenter}
+                    showDirectionsUI={false}
+                    isInteractive={false}
+                    height="600px"
+                    showingYourRoute={true}
+                  />
+                ) : (
+                  <div className="p-8 text-center text-gray-400">
+                    Route unavailable — pickup or dropoff location missing.
+                  </div>
+                )}
                 <div className="p-8 text-center text-gray-500">
                   Map view coming soon...
                 </div>

@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState, useMemo } from "react";
-import { useNavigate, useLocation , useSearchParams } from "react-router-dom";
+import { useNavigate, useLocation, useSearchParams } from "react-router-dom";
 import axios from "axios";
 import { Toast } from "primereact/toast";
 import useNearbyDriversStore from "../../hooks/useNearbyDriversStore";
@@ -10,6 +10,8 @@ import MapComponent from "../maps/MapComponent";
 import CarLoader from "../../resusables/CarLoader";
 import userProfilePage from "../../assets/user.png";
 import PageMeta from "../common/PageMeta";
+
+const RETRY_COOLDOWN = 30; // ✅ cooldown time in seconds
 
 const DriverFinding = () => {
   const navigate = useNavigate();
@@ -27,12 +29,53 @@ const DriverFinding = () => {
   const [retryingDriver, setRetryingDriver] = useState(false);
   const [activeDriver, setActiveDriver] = useState(null);
 
+  // ✅ NEW: Cooldown State
+  const [retryCooldown, setRetryCooldown] = useState(0);
+
   const startLat = parseFloat(searchParams.get("startLat"));
   const startLng = parseFloat(searchParams.get("startLng"));
 
-  
+  // ✅ Load cooldown from localStorage on mount
+  useEffect(() => {
+    const savedTimestamp = localStorage.getItem(`retryTimestamp_${bookingId}`);
+    if (savedTimestamp) {
+      const diff = Math.floor((Date.now() - Number(savedTimestamp)) / 1000);
+      if (diff < RETRY_COOLDOWN) {
+        setRetryCooldown(RETRY_COOLDOWN - diff);
+      } else {
+        localStorage.removeItem(`retryTimestamp_${bookingId}`);
+      }
+    }
+  }, [bookingId]);
 
-  // Fallback if bookingId is missing → redirect to BookRide
+  // ✅ Countdown interval
+  useEffect(() => {
+    if (retryCooldown <= 0) return;
+    const interval = setInterval(() => {
+      setRetryCooldown((prev) => {
+        if (prev <= 1) {
+          localStorage.removeItem(`retryTimestamp_${bookingId}`);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [retryCooldown, bookingId]);
+
+  useEffect(() => {
+    let interval;
+    if (ride?.bookingStatus === "ASSIGNING_DRIVER" && startLat && startLng) {
+      fetchNearbyDrivers(startLat, startLng);
+
+      interval = setInterval(() => {
+        fetchNearbyDrivers(startLat, startLng);
+      }, 10000);
+    }
+
+    return () => clearInterval(interval);
+  }, [ride?.bookingStatus, startLat, startLng, fetchNearbyDrivers]);
+
   useEffect(() => {
     if (!bookingId) {
       toast.current?.show({
@@ -56,7 +99,6 @@ const DriverFinding = () => {
         { withCredentials: true }
       );
       setRide(res.data);
-      console.log("Fetched ride details:", res.data);
     } catch (err) {
       console.error("Failed to fetch ride details:", err);
       toast.current?.show({
@@ -89,13 +131,23 @@ const DriverFinding = () => {
         bookingStatus: "SCHEDULED",
       });
       setTimeout(() => navigate(`/rides/${bookingId}`), 2000);
+
+      // ✅ Clear retry timestamp if driver assigned
+      localStorage.removeItem(`retryTimestamp_${bookingId}`);
     }
   }, [connected, ride, bookingId, navigate, setActiveBooking]);
 
-  // Retry handler
+  // ✅ Retry handler with cooldown logic
   const handleRetryFindDriver = async () => {
+    if (retryCooldown > 0) return; // extra protection
+
     try {
       setRetryingDriver(true);
+
+      // ✅ Set new cooldown
+      localStorage.setItem(`retryTimestamp_${bookingId}`, Date.now());
+      setRetryCooldown(RETRY_COOLDOWN);
+
       const res = await axios.post(
         `${import.meta.env.VITE_BOOKING_BACKEND_URL}/${bookingId}/retry`,
         { passengerId: authUser.userId },
@@ -105,6 +157,7 @@ const DriverFinding = () => {
         ...prev,
         bookingStatus: res.data?.bookingStatus || prev.bookingStatus,
       }));
+
       toast.current?.show({
         severity: "info",
         summary: "Retrying",
@@ -139,128 +192,121 @@ const DriverFinding = () => {
 
   return (
     <>
-    <PageMeta page={"driverFinding"} />
-    <div className="relative flex flex-col items-center bg-[#0e0e0e] min-h-screen py-6 overflow-hidden">
-      <Toast ref={toast} />
+      <PageMeta page={"driverFinding"} />
+      <div className="relative flex flex-col items-center bg-[#0e0e0e] min-h-screen py-6 overflow-hidden">
+        <Toast ref={toast} />
 
-      {showLoader && (
-        <div className="absolute inset-0 bg-black bg-opacity-85 flex items-center justify-center z-40">
-          <CarLoader
-            message={
-              retryingDriver
-              ? "Retrying driver assignment..."
-              : "Loading ride details..."
-            }
+        {showLoader && (
+          <div className="absolute inset-0 bg-black bg-opacity-85 flex items-center justify-center z-40">
+            <CarLoader
+              message={
+                retryingDriver
+                  ? "Retrying driver assignment..."
+                  : "Loading ride details..."
+              }
             />
-        </div>
-      )}
+          </div>
+        )}
 
-      {/* Map Section */}
-      {ride && (
-        <div className="w-[90%] rounded-2xl overflow-hidden relative shadow-lg border border-gray-700">
-          <MapComponent
-            center={mapCenter}
-            zoom={15}
-            height="70vh"
-            origin
-            drivers={drivers}
-            activeDriver={activeDriver}
-            showingYourRoute={true}
-            onDriverMouseOver={(driverId) => setActiveDriver(driverId)}
-            onDriverMouseOut={() => setActiveDriver(null)}
-            />
-        </div>
-      )}
-
-      {/* Ride Details */}
-      {ride && !loadingRide && (
-        <div className="bg-[#141414] border border-gray-800 rounded-2xl shadow-xl p-6 mt-6 w-[90%] max-w-3xl text-gray-300">
-          <div className="flex flex-col sm:flex-row items-center gap-6">
-            <img
-              src={userProfilePage}
-              alt={ride.driverName}
-              className="w-24 h-24 rounded-full border-4 border-yellow-400 object-cover"
+        <div className="w-[95%] max-w-7xl flex flex-col lg:flex-row gap-6">
+          {ride && (
+            <div className="flex-1 rounded-2xl overflow-hidden shadow-lg border border-gray-700">
+              <MapComponent
+                center={mapCenter}
+                zoom={15}
+                height="75vh"
+                origin
+                drivers={drivers}
+                activeDriver={activeDriver}
+                showingYourRoute={true}
+                onDriverMouseOver={(driverId) => setActiveDriver(driverId)}
+                onDriverMouseOut={() => setActiveDriver(null)}
               />
-            <div className="flex-1 text-center sm:text-left">
-              <div className="flex items-center justify-center sm:justify-start gap-2 mb-1">
-                {ride.bookingStatus === "COMPLETED" ? (
-                  <i className="pi pi-check-circle text-green-400 text-lg" />
-                ) : (
-                  <i className="pi pi-clock text-yellow-400 text-lg" />
-                )}
-                <span className="text-sm font-semibold uppercase tracking-wider text-yellow-400">
-                  {ride.bookingStatus}
-                </span>
+            </div>
+          )}
+
+          {ride && !loadingRide && (
+            <div className="flex-1 bg-[#141414] border border-gray-800 rounded-2xl shadow-xl p-6 text-gray-300 h-fit">
+              <div className="flex flex-col sm:flex-row items-center gap-6">
+                <img
+                  src={userProfilePage}
+                  alt={ride.driverName}
+                  className="w-24 h-24 rounded-full border-4 border-yellow-400 object-cover"
+                />
+                <div className="flex-1 text-center sm:text-left">
+                  <div className="flex items-center justify-center sm:justify-start gap-2 mb-1">
+                    {ride.bookingStatus === "COMPLETED" ? (
+                      <i className="pi pi-check-circle text-green-400 text-lg" />
+                    ) : (
+                      <i className="pi pi-clock text-yellow-400 text-lg" />
+                    )}
+                    <span className="text-sm font-semibold uppercase tracking-wider text-yellow-400">
+                      {ride.bookingStatus}
+                    </span>
+                  </div>
+
+                  <h2 className="text-2xl font-bold text-yellow-400 mb-2">
+                    {ride.driverName || "Driver Not Assigned Yet"}
+                  </h2>
+
+                  <p className="text-sm text-gray-400">
+                    Vehicle:{" "}
+                    <span className="text-white">
+                      {ride.vehicleType || "—"} ({ride.vehicleNumber || "—"})
+                    </span>
+                  </p>
+                  <p className="text-sm text-gray-400">
+                    Phone:{" "}
+                    <span className="text-white">{ride.phoneNumber || "—"}</span>
+                  </p>
+
+                  {isAssigning && (
+                    <div className="mt-4 flex justify-center sm:justify-start">
+                      <button
+                        onClick={handleRetryFindDriver}
+                        disabled={retryCooldown > 0}
+                        className={`flex items-center gap-2 py-2 px-5 rounded-full border transition-all ${
+                          retryCooldown > 0
+                            ? "bg-gray-700 text-gray-400 cursor-not-allowed"
+                            : "border-yellow-400 text-yellow-400 hover:bg-yellow-400 hover:text-black"
+                        }`}
+                      >
+                        {retryCooldown > 0 ? (
+                          <>
+                            ⏳ Retry in {retryCooldown}s
+                          </>
+                        ) : (
+                          <>
+                            <i className="pi pi-refresh" /> Retry Finding Driver
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
 
-              <h2 className="text-2xl font-bold text-yellow-400 mb-2">
-                {ride.driverName || "Driver Not Assigned Yet"}
-              </h2>
-
-              <p className="text-sm text-gray-400">
-                Vehicle:{" "}
-                <span className="text-white">
-                  {ride.vehicleType || "—"} ({ride.vehicleNumber || "—"})
-                </span>
-              </p>
-              <p className="text-sm text-gray-400">
-                Phone:{" "}
-                <span className="text-white">{ride.driverPhone || "—"}</span>
-              </p>
-
-              {isAssigning && (
-                <div className="mt-4 flex justify-center sm:justify-start">
-                  <button
-                    onClick={handleRetryFindDriver}
-                    disabled={retryingDriver}
-                    className={`flex items-center gap-2 py-2 px-5 rounded-full border transition-all ${
-                      retryingDriver
-                      ? "bg-gray-700 text-gray-400 cursor-not-allowed"
-                      : "border-yellow-400 text-yellow-400 hover:bg-yellow-400 hover:text-black"
-                    }`}
-                    >
-                    {retryingDriver ? (
-                      <>
-                        <i className="pi pi-spin pi-spinner" /> Retrying...
-                      </>
-                    ) : (
-                      <>
-                        <i className="pi pi-refresh" /> Retry Finding Driver
-                      </>
-                    )}
-                  </button>
-                </div>
-              )}
+              <div className="mt-6 border-t border-gray-800 pt-4 space-y-2">
+                <p>
+                  <span className="text-green-400 font-bold text-sm">Pickup:</span>{" "}
+                  {ride.pickupLocation?.address || "N/A"}
+                </p>
+                <p>
+                  <span className="text-red-400 font-bold text-sm">Dropoff:</span>{" "}
+                  {ride.dropoffLocation?.address || "N/A"}
+                </p>
+                <p className="text-sm font-bold text-gray-400">
+                  Payment Mode:{" "}
+                  <span className="text-yellow-400 font-semibold">
+                    {ride.paymentMode || "Cash"}
+                  </span>
+                </p>
+              </div>
             </div>
-          </div>
-
-          {/* Ride Info */}
-          <div className="mt-6 border-t border-gray-800 pt-4 space-y-2">
-            <p>
-              <span className="text-gray-400 text-sm">Pickup:</span>{" "}
-              {ride.pickupLocation?.address || "N/A"}
-            </p>
-            <p>
-              <span className="text-gray-400 text-sm">Dropoff:</span>{" "}
-              {ride.dropoffLocation?.address || "N/A"}
-            </p>
-            <p className="text-sm text-gray-400">
-              Fare:{" "}
-              <span className="text-green-400 font-semibold">
-                ₹{ride.fare || "N/A"}
-              </span>
-            </p>
-            <p className="text-sm text-gray-400">
-              Payment Mode:{" "}
-              <span className="text-yellow-400 font-semibold">
-                {ride.paymentMode || "Cash"}
-              </span>
-            </p>
-          </div>
+          )}
         </div>
-      )}
-    </div>
-      </>
+      </div>
+    </>
   );
 };
 

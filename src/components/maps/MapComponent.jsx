@@ -7,6 +7,8 @@ import {
 import CurrentLocationButton from "./CurrentLocationButton";
 import drivercar from "../../assets/drivercar.png";
 import { useLocationStore } from "../../hooks/useLocationStore";
+import pickupIcon from "../../assets/pin2.png";
+import dropIcon from "../../assets/pin.png";
 
 const containerStyle = {
   width: "100%",
@@ -268,21 +270,88 @@ const MapComponent = ({
 
   useEffect(() => {
     if (!map || !window.google) return;
+
+    // Remove old markers
     routeMarkersRef.current.forEach((marker) => (marker.map = null));
     routeMarkersRef.current = [];
-    if (directionResponse) {
+
+    if (directionResponse && origin && destination) {
       const leg = directionResponse.routes[0].legs[0];
-      const startMarker = new window.google.maps.marker.AdvancedMarkerElement({
+
+      // 🟢 Pickup Marker with Label
+      const pickupWrapper = document.createElement("div");
+      pickupWrapper.style.display = "flex";
+      pickupWrapper.style.flexDirection = "column";
+      pickupWrapper.style.alignItems = "center";
+
+      const pickupLabel = document.createElement("div");
+      pickupLabel.innerText = origin.address || "Pickup";
+      pickupLabel.style.color = "#fff";
+      pickupLabel.style.background = "rgba(0, 0, 0, 0.7)";
+      pickupLabel.style.padding = "3px 8px";
+      pickupLabel.style.borderRadius = "6px";
+      pickupLabel.style.fontSize = "12px";
+      pickupLabel.style.marginBottom = "4px";
+      pickupLabel.style.whiteSpace = "nowrap";
+      pickupLabel.style.maxWidth = "150px";
+      pickupLabel.style.textAlign = "center";
+      pickupLabel.style.overflow = "hidden";
+      pickupLabel.style.textOverflow = "ellipsis";
+
+      const pickupImg = document.createElement("img");
+      pickupImg.src = pickupIcon;
+      pickupImg.style.width = "38px";
+      pickupImg.style.height = "38px";
+
+      pickupWrapper.appendChild(pickupLabel);
+      pickupWrapper.appendChild(pickupImg);
+
+      const pickupMarker = new window.google.maps.marker.AdvancedMarkerElement({
         map: map,
         position: leg.start_location,
+        content: pickupWrapper,
+        title: "Pickup Location",
       });
-      const endMarker = new window.google.maps.marker.AdvancedMarkerElement({
+
+      // 🔴 Drop Marker with Label
+      const dropWrapper = document.createElement("div");
+      dropWrapper.style.display = "flex";
+      dropWrapper.style.flexDirection = "column";
+      dropWrapper.style.alignItems = "center";
+
+      const dropLabel = document.createElement("div");
+      dropLabel.innerText = destination.address || "Drop";
+      dropLabel.style.color = "#fff";
+      dropLabel.style.background = "rgba(0, 0, 0, 0.7)";
+      dropLabel.style.padding = "3px 8px";
+      dropLabel.style.borderRadius = "6px";
+      dropLabel.style.fontSize = "12px";
+      dropLabel.style.marginBottom = "4px";
+      dropLabel.style.whiteSpace = "nowrap";
+      dropLabel.style.maxWidth = "150px";
+      dropLabel.style.textAlign = "center";
+      dropLabel.style.overflow = "hidden";
+      dropLabel.style.textOverflow = "ellipsis";
+
+      const dropImg = document.createElement("img");
+      dropImg.src = dropIcon;
+      dropImg.style.width = "38px";
+      dropImg.style.height = "38px";
+
+      dropWrapper.appendChild(dropLabel);
+      dropWrapper.appendChild(dropImg);
+
+      const dropMarker = new window.google.maps.marker.AdvancedMarkerElement({
         map: map,
         position: leg.end_location,
+        content: dropWrapper,
+        title: "Drop Location",
       });
-      routeMarkersRef.current = [startMarker, endMarker];
+
+      // Save both markers
+      routeMarkersRef.current = [pickupMarker, dropMarker];
     }
-  }, [map, directionResponse]);
+  }, [map, directionResponse, origin, destination]);
 
   useEffect(() => {
     if (!map || !window.google) return;

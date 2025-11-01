@@ -46,7 +46,6 @@ const Header = () => {
 
         <DesktopMenu
           navigate={navigate}
-          activeBooking={activeBooking}
           authUser={authUser}
           onLogout={handleLogout}
         />
@@ -64,7 +63,6 @@ const Header = () => {
       <MobileMenu
         visible={menuVisible}
         setVisible={setMenuVisible}
-        activeBooking={activeBooking}
         navigate={navigate}
         authUser={authUser}
         onLogout={handleLogout}
