@@ -11,7 +11,7 @@ import CarLoader from "../../resusables/CarLoader";
 import userProfilePage from "../../assets/user.png";
 import PageMeta from "../common/PageMeta";
 
-const RETRY_COOLDOWN = 30; // ✅ cooldown time in seconds
+const RETRY_COOLDOWN = 30;
 
 const DriverFinding = () => {
   const navigate = useNavigate();
@@ -29,13 +29,11 @@ const DriverFinding = () => {
   const [retryingDriver, setRetryingDriver] = useState(false);
   const [activeDriver, setActiveDriver] = useState(null);
 
-  // ✅ NEW: Cooldown State
   const [retryCooldown, setRetryCooldown] = useState(0);
 
   const startLat = parseFloat(searchParams.get("startLat"));
   const startLng = parseFloat(searchParams.get("startLng"));
 
-  // ✅ Load cooldown from localStorage on mount
   useEffect(() => {
     const savedTimestamp = localStorage.getItem(`retryTimestamp_${bookingId}`);
     if (savedTimestamp) {
@@ -48,7 +46,6 @@ const DriverFinding = () => {
     }
   }, [bookingId]);
 
-  // ✅ Countdown interval
   useEffect(() => {
     if (retryCooldown <= 0) return;
     const interval = setInterval(() => {
@@ -132,19 +129,16 @@ const DriverFinding = () => {
       });
       setTimeout(() => navigate(`/rides/${bookingId}`), 2000);
 
-      // ✅ Clear retry timestamp if driver assigned
       localStorage.removeItem(`retryTimestamp_${bookingId}`);
     }
   }, [connected, ride, bookingId, navigate, setActiveBooking]);
 
-  // ✅ Retry handler with cooldown logic
   const handleRetryFindDriver = async () => {
     if (retryCooldown > 0) return; // extra protection
 
     try {
       setRetryingDriver(true);
 
-      // ✅ Set new cooldown
       localStorage.setItem(`retryTimestamp_${bookingId}`, Date.now());
       setRetryCooldown(RETRY_COOLDOWN);
 

@@ -13,6 +13,7 @@ const PassengerRideDetails = () => {
   const navigate = useNavigate();
 
   const [ride, setRide] = useState(null);
+  const [review, setReview] = useState(null);
   const [isFetching, setIsFetching] = useState(true);
   const [error, setError] = useState("");
   const [showMap, setShowMap] = useState(false);
@@ -37,7 +38,18 @@ const PassengerRideDetails = () => {
 
         setRide(res.data);
         setStartLocation(res.data.pickupLocation);
-        console.log("Passenger ride details fetched:", res.data);
+
+        if (res.data.bookingStatus === "COMPLETED") {
+          try {
+            const reviewRes = await axios.get(
+              `${import.meta.env.VITE_REVIEW_BACKEND_URL}/review/booking/${bookingId}`,
+              { withCredentials: true }
+            );
+            setReview(reviewRes.data);
+          } catch (err) {
+            console.log("No review submitted yet");
+          }
+        }
       } catch (err) {
         console.error("Error fetching ride details:", err);
         setError(err.response?.data?.error || "Failed to fetch ride details");
@@ -59,7 +71,6 @@ const PassengerRideDetails = () => {
         { withCredentials: true }
       );
 
-      console.log("Retry driver assignment response:", res.data);
       setRide((prev) => ({
         ...prev,
         bookingStatus: res.data?.bookingStatus || prev.bookingStatus,
@@ -67,12 +78,9 @@ const PassengerRideDetails = () => {
 
       navigate(
         `/driver-finding?startLat=${startLocation.latitude}&startLng=${startLocation.longitude}`,
-        {
-          state: { bookingId },
-        }
+        { state: { bookingId } }
       );
     } catch (err) {
-      console.error("Retry driver assignment failed:", err);
       setError(
         err.response?.data?.error || "Failed to retry driver assignment"
       );
@@ -325,6 +333,8 @@ const PassengerRideDetails = () => {
               </button>
             </div>
 
+            
+
             {showMap && (
               <div className="mt-6 rounded-xl overflow-hidden border border-gray-800">
                 {pickupLocation && dropoffLocation && mapCenter ? (
@@ -354,6 +364,29 @@ const PassengerRideDetails = () => {
               </div>
             )}
           </div>
+
+          {bookingStatus === "COMPLETED" && review && (
+            <div className="bg-[#141414] border border-gray-800 rounded-2xl shadow-xl p-6">
+              <h3 className="text-2xl font-semibold text-yellow-400 border-b border-gray-800 pb-3 mb-5 flex items-center gap-2">
+                <i className="pi pi-star text-yellow-400 text-xl" />
+                Your Review
+              </h3>
+
+              <div className="text-gray-300 space-y-3">
+                <p className="text-lg font-semibold text-yellow-400">
+                  ⭐ {review.rating}/5
+                </p>
+
+                {review.content ? (
+                  <p className="text-gray-300 italic border-l-4 border-yellow-400 pl-4">
+                    "{review.content}"
+                  </p>
+                ) : (
+                  <p className="text-gray-500 italic">No written feedback provided.</p>
+                )}
+              </div>
+            </div>
+          )}
 
           {/* CTA Buttons */}
           <div className="text-center mt-10 flex flex-col sm:flex-row gap-4 justify-center">

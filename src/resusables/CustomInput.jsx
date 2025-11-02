@@ -1,74 +1,64 @@
-import React from "react";
+import React, { useState } from "react";
+import { InputText } from "primereact/inputtext";
 import { FloatLabel } from "primereact/floatlabel";
-import { Password } from "primereact/password";
 
 const CustomInput = ({
-  id,
-  type = "text",
   label,
-  icon,
-  value = "",
+  type = "text",
+  value,
   onChange,
-  className = "",
-  readOnly = false,
+  name,
+  ...rest
 }) => {
-  const baseStyle =
-    "bg-[#1a1a1a] text-white text-sm border border-gray-700 rounded-md px-3 py-3 pr-10 w-full";
+  const [showPassword, setShowPassword] = useState(false);
 
-  const hasValue = value !== null && value !== undefined && value !== "";
+  const renderInput = () => {
+    const baseClasses =
+      "w-full bg-[#0f1218] text-gray-100 border border-gray-700 rounded-xl px-4 py-3 outline-none transition-all duration-200 focus:border-yellow-400 focus:ring-2 focus:ring-yellow-400/40 shadow-inner focus:shadow-[0_0_8px_#facc15aa]";
+
+    if (type === "password") {
+      return (
+        <div className="relative w-full">
+          <InputText
+            id={name}
+            type={showPassword ? "text" : "password"}
+            value={value}
+            onChange={onChange}
+            {...rest}
+            className={baseClasses}
+          />
+          <i
+            className={`pi ${
+              showPassword ? "pi-eye-slash" : "pi-eye"
+            } absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 cursor-pointer hover:text-yellow-400 transition-colors duration-200`}
+            onClick={() => setShowPassword(!showPassword)}
+          />
+        </div>
+      );
+    }
+
+    return (
+      <InputText
+        id={name}
+        type={type}
+        value={value}
+        onChange={onChange}
+        {...rest}
+        className={baseClasses}
+      />
+    );
+  };
 
   return (
-    <div className="relative mb-4 w-full">
+    <div className="w-full mb-6">
       <FloatLabel>
-        {type === "password" ? (
-          <Password
-            id={id}
-            value={value}
-            onChange={onChange}
-            toggleMask
-            feedback={false}
-            inputId={id}
-            inputClassName={`${baseStyle} ${className} !pr-10`}
-            pt={{
-              root: { className: "w-full" },
-              input: {
-                className: "!text-sm !leading-none !p-0 !px-3 !py-3",
-              },
-              toggleMask: {
-                className:
-                  "!text-gray-400 right-3 top-1/2 -translate-y-1/2",
-              },
-            }}
-            placeholder=" "
-          />
-        ) : (
-          <input
-            id={id}
-            type={type}
-            value={value}
-            onChange={onChange}
-            className={`${baseStyle} ${className} ${
-              readOnly ? "cursor-default" : ""
-            }`}
-            placeholder={hasValue ? label : " "} // key fix for FloatLabel behavior
-            readOnly={readOnly}
-          />
-        )}
-
+        {renderInput()}
         <label
-          htmlFor={id}
-          className={`text-gray-400 text-sm ${
-            hasValue ? "transform scale-90 -translate-y-4" : ""
-          }`}
+          htmlFor={name}
+          className="text-gray-400 transition-all duration-200 peer-focus:text-yellow-400 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100"
         >
           {label}
         </label>
-
-        {icon && type !== "password" && (
-          <span
-            className={`pi ${icon} absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm`}
-          />
-        )}
       </FloatLabel>
     </div>
   );

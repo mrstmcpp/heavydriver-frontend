@@ -7,6 +7,7 @@ import useAuthStore from "../../hooks/useAuthStore";
 import useBookingStore from "../../hooks/useBookingStore";
 import { useToast } from "../../context/ToastContext";
 import PageMeta from "../common/PageMeta";
+import RatingDialog from "../../resusables/RatingDialog";
 
 const OngoingRide = () => {
   const { bookingId: bookingIdParam } = useParams();
@@ -15,6 +16,7 @@ const OngoingRide = () => {
   const [ride, setRide] = useState(null);
   const [distance, setDistance] = useState(null);
   const [duration, setDuration] = useState(null);
+  const [showRatingDialog, setShowRatingDialog] = useState(false);
   const { showToast } = useToast();
   const navigate = useNavigate();
 
@@ -24,24 +26,8 @@ const OngoingRide = () => {
   useEffect(() => {
     if (authLoading || loadingBooking) return;
 
-    // if (bookingStatusFromStore === "COMPLETED") {
-    //       useBookingStore.getState().clearBooking();
-
-    //   if (bookingIdToUse) navigate(`/rides/${bookingIdToUse}/details`);
-    //   else navigate("/");
-    //   return;
-    // }
-    // if (bookingStatusFromStore === "CANCELLED") {
-    //       useBookingStore.getState().clearBooking();
-
-    //   if (bookingIdToUse) navigate(`/rides/${bookingIdToUse}/details`);
-    //   else navigate("/");
-    //   return;
-    // }
-
     // require a booking id to fetch
     if (!bookingIdToUse) {
-      // no booking send them away
       navigate("/");
       return;
     }
@@ -50,13 +36,8 @@ const OngoingRide = () => {
     const fetchRide = async () => {
       try {
         const res = await axios.post(
-          `${
-            import.meta.env.VITE_BOOKING_BACKEND_URL
-          }/details/${bookingIdToUse}`,
-          {
-            userId,
-            role: "PASSENGER",
-          }
+          `${import.meta.env.VITE_BOOKING_BACKEND_URL}/details/${bookingIdToUse}`,
+          { withCredentials: true }
         );
 
         if (cancelled) return;
@@ -65,11 +46,15 @@ const OngoingRide = () => {
         setRide(data);
 
         const status = data.bookingStatus?.toUpperCase();
+        const id = bookingIdToUse;
 
-        if (status === "COMPLETED" || status === "CANCELLED") {
-          // console.log("Ride completed — clearing booking");
-          const id = bookingIdToUse;
-          // console.log("clearing : " + id);
+        // ✅ updated logic here
+        if (status === "COMPLETED") {
+          setShowRatingDialog(true);
+          return;
+        }
+
+        if (status === "CANCELLED") {
           useBookingStore.getState().clearBooking();
           navigate(`/rides/${id}/details`);
           return;
@@ -102,7 +87,7 @@ const OngoingRide = () => {
     showToast,
   ]);
 
-  // is used to receive route information (distance and duration) back from your map once it’s calculated.
+  // Callback from route calculation
   const handleRouteCalculated = useCallback((dist, time) => {
     setDistance((prev) => (prev !== dist ? dist : prev));
     setDuration((prev) => (prev !== time ? time : prev));
@@ -136,6 +121,7 @@ const OngoingRide = () => {
     <>
       <PageMeta page={"activeRide"} />
       <PageTopBanner section="Active Ride" />
+
       <div className="bg-black text-white py-16 px-6 sm:px-12 lg:px-24">
         <div className="max-w-5xl mx-auto">
           <div className="bg-[#1a1a1a] rounded-2xl shadow-lg p-6 mb-10 flex flex-col sm:flex-row gap-6 items-center">
@@ -211,6 +197,18 @@ const OngoingRide = () => {
           </div>
         </div>
       </div>
+
+      <RatingDialog
+        visible={showRatingDialog}
+        bookingId={bookingIdToUse}
+        onClose={(submitted) => {
+          setShowRatingDialog(false);
+          if (submitted) {
+            useBookingStore.getState().clearBooking();
+            navigate(`/rides/${bookingIdToUse}/details`);
+          }
+        }}
+      />
     </>
   );
 };
