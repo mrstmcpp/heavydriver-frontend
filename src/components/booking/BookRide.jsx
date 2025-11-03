@@ -187,142 +187,150 @@ const BookRide = () => {
   };
 
   return (
-    <div className="bg-black text-white relative">
+    <>
       <PageMeta page={"bookRide"} />
       <PageTopBanner section="Book a Ride" />
       <Toast ref={toast} />
+      <div className="m-4">
 
-      {/* Loader Overlay */}
-      {fetchingFare && (
-        <div className="absolute inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50">
-          <CarLoader message="Loading fare estimate" />
-        </div>
-      )}
-
-      <div className="max-w-3xl mx-auto bg-[#0f0f0f] p-8 rounded-2xl shadow-lg mt-10 mb-10 border border-gray-800 relative z-10">
-        <h2 className="text-4xl font-bold mb-2 text-yellow-400">
-          Book Your Taxi Ride!
-        </h2>
-        <p className="text-gray-400 mb-8">
-          Choose your preferences and we'll find you the best ride.
-        </p>
-
-        <div className="space-y-8">
-          <CarTypeSelector carType={carType} setCarType={setCarType} />
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div onClick={() => openMapFor("start")} className="cursor-pointer">
-              <CustomInput
-                label="Start Location"
-                icon="pi pi-map-marker"
-                value={startAddress || ""}
-                readOnly
-              />
-            </div>
-            <div onClick={() => openMapFor("end")} className="cursor-pointer">
-              <CustomInput
-                label="End Location"
-                icon="pi pi-map-marker"
-                value={endAddress || ""}
-                readOnly
-              />
-            </div>
+        {fetchingFare && (
+          <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-[9999]">
+            <CarLoader message="Loading fare estimate" />
           </div>
+        )}
 
-          {fareDetails && (
-            <div className="space-y-4">
-              <h3 className="text-2xl font-semibold text-yellow-400 border-b border-gray-700 pb-2">
-                Ride Estimate
-              </h3>
-              <div className="grid grid-cols-2 gap-4 text-center bg-[#1a1a1a] p-4 rounded-lg">
-                <div>
-                  <p className="text-sm text-gray-400">Pickup Address</p>
-                  <p className="text-xl font-bold">{startAddress}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-400">Drop-off Address</p>
-                  <p className="text-xl font-bold">{endAddress}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-400">Est. Distance</p>
-                  <p className="text-xl font-bold">{fareDetails.distance} km</p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-400">Est. Time</p>
-                  <p className="text-xl font-bold">
-                    {fareDetails.duration} min
-                  </p>
-                </div>
-                <div className="col-span-2">
-                  <p className="text-sm text-gray-400">Est. Fare</p>
-                  <p className="text-2xl font-bold text-yellow-400">
-                    ₹{fareDetails.fare.toFixed(2)}
-                  </p>
-                </div>
-              </div>
-              <p className="text-sm text-gray-500 italic text-center mt-2">
-                *Note: The estimated fare may vary based on traffic, route
-                changes, and waiting time.*
-              </p>
+        <div className="max-w-3xl mx-auto bg-[#0f0f0f] p-8 rounded-2xl shadow-lg mt-10 mb-10 border border-gray-800 relative z-10">
+          <h2 className="text-4xl font-bold mb-2 text-yellow-400">
+            Book Your Ride!
+          </h2>
+          <p className="text-gray-400 mb-8">
+            Choose your preferences and we'll find you the best ride.
+          </p>
+
+          <div className="space-y-8">
+            <div className="w-full">
+              <CarTypeSelector carType={carType} setCarType={setCarType} />
             </div>
-          )}
 
-          {startLocation && endLocation && (
-            <div className="mt-6">
-              <h3 className="text-2xl font-semibold text-yellow-400 border-b border-gray-700 pb-2">
-                Route Preview
-              </h3>
-              <div className="h-64 md:h-80 w-full mt-3 rounded-lg overflow-hidden">
-                <MapComponent
-                  origin={startLocation}
-                  destination={endLocation}
-                  center={startLocation}
-                  showDirectionsUI={false}
-                  isInteractive={false}
-                  height="100%"
-                  showingYourRoute={true}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div
+                onClick={() => openMapFor("start")}
+                className="cursor-pointer"
+              >
+                <CustomInput
+                  label="Start Location"
+                  icon="pi pi-map-marker"
+                  value={startAddress || ""}
+                  readOnly
+                />
+              </div>
+              <div onClick={() => openMapFor("end")} className="cursor-pointer">
+                <CustomInput
+                  label="End Location"
+                  icon="pi pi-map-marker"
+                  value={endAddress || ""}
+                  readOnly
                 />
               </div>
             </div>
-          )}
 
-          <div className="flex flex-col sm:flex-row gap-4 pt-4">
-            <YellowButton
-              onClick={fetchFareEstimate}
-              disabled={
-                !startLocation || !endLocation || !carType || fetchingFare
-              }
-            >
-              {fetchingFare ? "Fetching Fare..." : "Get Fare Estimate"}
-            </YellowButton>
+            {fareDetails && (
+              <div className="space-y-4">
+                <h3 className="text-2xl font-semibold text-yellow-400 border-b border-gray-700 pb-2">
+                  Ride Estimate
+                </h3>
+                <div className="grid grid-cols-2 gap-4 text-center bg-[#1a1a1a] p-4 rounded-lg">
+                  <div>
+                    <p className="text-sm text-gray-400">Pickup Address</p>
+                    <p className="text-xl font-bold">{startAddress}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-400">Drop-off Address</p>
+                    <p className="text-xl font-bold">{endAddress}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-400">Est. Distance</p>
+                    <p className="text-xl font-bold">
+                      {fareDetails.distance} km
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-400">Est. Time</p>
+                    <p className="text-xl font-bold">
+                      {fareDetails.duration} min
+                    </p>
+                  </div>
+                  <div className="col-span-2">
+                    <p className="text-sm text-gray-400">Est. Fare</p>
+                    <p className="text-2xl font-bold text-yellow-400">
+                      ₹{fareDetails.fare.toFixed(2)}
+                    </p>
+                  </div>
+                </div>
+                <p className="text-sm text-gray-500 italic text-center mt-2">
+                  *Note: The estimated fare may vary based on traffic, route
+                  changes, and waiting time.*
+                </p>
+              </div>
+            )}
 
-            <YellowButton
-              onClick={handleBooking}
-              disabled={!fareDetails || fetchingFare}
-            >
-              Create Booking
-            </YellowButton>
+            {startLocation && endLocation && (
+              <div className="mt-6">
+                <h3 className="text-2xl font-semibold text-yellow-400 border-b border-gray-700 pb-2">
+                  Route Preview
+                </h3>
+                <div className="h-64 md:h-80 w-full mt-3 rounded-lg overflow-hidden">
+                  <MapComponent
+                    origin={startLocation}
+                    destination={endLocation}
+                    center={startLocation}
+                    showDirectionsUI={false}
+                    isInteractive={false}
+                    height="100%"
+                    showingYourRoute={true}
+                  />
+                </div>
+              </div>
+            )}
+
+            <div className="flex flex-col sm:flex-row gap-4 pt-4">
+              <YellowButton
+                onClick={fetchFareEstimate}
+                disabled={
+                  !startLocation || !endLocation || !carType || fetchingFare
+                }
+              >
+                {fetchingFare ? "Fetching Fare..." : "Get Fare Estimate"}
+              </YellowButton>
+
+              <YellowButton
+                onClick={handleBooking}
+                disabled={!fareDetails || fetchingFare}
+              >
+                Create Booking
+              </YellowButton>
+            </div>
           </div>
         </div>
-      </div>
 
-      <Dialog
-        header={`Select ${
-          activeField === "start" ? "Start" : "Destination"
-        } Location`}
-        visible={mapVisible}
-        maximizable
-        style={{ width: "80vw", height: "80vh" }}
-        onHide={() => setMapVisible(false)}
-      >
-        <MapComponent
-          center={mapCenter}
-          height="65vh"
-          onLocationSelect={handleLocationSelect}
-          showDirectionsUI={true}
-        />
-      </Dialog>
-    </div>
+        <Dialog
+          header={`Select ${
+            activeField === "start" ? "Start" : "Destination"
+          } Location`}
+          visible={mapVisible}
+          maximizable
+          style={{ width: "80vw", height: "80vh" }}
+          onHide={() => setMapVisible(false)}
+        >
+          <MapComponent
+            center={mapCenter}
+            height="65vh"
+            onLocationSelect={handleLocationSelect}
+            showDirectionsUI={true}
+          />
+        </Dialog>
+      </div>
+    </>
   );
 };
 

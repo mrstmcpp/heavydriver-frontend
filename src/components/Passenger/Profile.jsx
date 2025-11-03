@@ -102,17 +102,9 @@ const PassengerProfilePage = () => {
 
             {/* Action Buttons */}
             <div className="flex flex-wrap justify-center gap-4 mt-6">
-              <YellowButton onClick={() => navigate("/profile/edit")}>
+              <YellowButton onClick={() => navigate("/settings")}>
                 <i className="pi pi-user-edit mr-2" />
                 Edit Profile
-              </YellowButton>
-
-              <YellowButton
-                onClick={() => navigate("/profile/change-password")}
-                className="!bg-gray-800 hover:!bg-gray-700 text-yellow-400 border border-yellow-400"
-              >
-                <i className="pi pi-lock mr-2" />
-                Change Password
               </YellowButton>
 
               <YellowButton

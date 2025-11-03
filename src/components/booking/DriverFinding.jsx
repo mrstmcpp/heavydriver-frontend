@@ -114,6 +114,31 @@ const DriverFinding = () => {
     fetchRideDetails();
   }, [bookingId, authUser]);
 
+  // 🔁 Redirect if ride is completed or cancelled
+  useEffect(() => {
+    if (!ride || !ride.bookingStatus) return;
+
+    if (ride.bookingStatus === "COMPLETED") {
+      toast.current?.show({
+        severity: "info",
+        summary: "Ride Completed",
+        detail: "Redirecting to ride summary...",
+        life: 2000,
+      });
+      setTimeout(() => navigate(`/rides/details/${bookingId}`), 1500);
+    }
+
+    if (ride.bookingStatus === "CANCELLED") {
+      toast.current?.show({
+        severity: "warn",
+        summary: "Ride Cancelled",
+        detail: "Redirecting to booking page...",
+        life: 2000,
+      });
+      setTimeout(() => navigate("/rides/new", { replace: true }), 1500);
+    }
+  }, [ride?.bookingStatus, bookingId, navigate]);
+
   // Handle socket-based driver assignment
   useEffect(() => {
     if (connected && ride?.bookingStatus === "SCHEDULED") {
@@ -127,7 +152,7 @@ const DriverFinding = () => {
         bookingId,
         bookingStatus: "SCHEDULED",
       });
-      setTimeout(() => navigate(`/rides/${bookingId}`), 2000);
+      setTimeout(() => navigate(`/rides/active/${bookingId}`), 2000);
 
       localStorage.removeItem(`retryTimestamp_${bookingId}`);
     }
@@ -182,7 +207,10 @@ const DriverFinding = () => {
   }, [ride]);
 
   const isAssigning = ride?.bookingStatus === "ASSIGNING_DRIVER";
-  const showLoader = loadingRide || retryingDriver;
+  const showLoader =
+    (loadingRide || retryingDriver) &&
+    ride?.bookingStatus !== "COMPLETED" &&
+    ride?.bookingStatus !== "CANCELLED";
 
   return (
     <>
@@ -203,7 +231,7 @@ const DriverFinding = () => {
         )}
 
         <div className="w-[95%] max-w-7xl flex flex-col lg:flex-row gap-6">
-          {ride && (
+          {ride && isAssigning && (
             <div className="flex-1 rounded-2xl overflow-hidden shadow-lg border border-gray-700">
               <MapComponent
                 center={mapCenter}
@@ -266,9 +294,7 @@ const DriverFinding = () => {
                         }`}
                       >
                         {retryCooldown > 0 ? (
-                          <>
-                            ⏳ Retry in {retryCooldown}s
-                          </>
+                          <>⏳ Retry in {retryCooldown}s</>
                         ) : (
                           <>
                             <i className="pi pi-refresh" /> Retry Finding Driver

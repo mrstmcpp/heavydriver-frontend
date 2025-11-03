@@ -30,6 +30,7 @@ import GoogleMapsProvider from "./context/GoogleMapsProvider";
 import PassengerProfilePage from "./components/Passenger/Profile";
 import PassengerRides from "./components/Passenger/Rides";
 import PassengerRideDetails from "./components/booking/RideDetailsPage";
+import Settings from "./components/Passenger/Settings";
 
 axios.defaults.withCredentials = true;
 function App() {
@@ -72,7 +73,7 @@ function App() {
             </ProtectedRoutes>
           } />
 
-          <Route path="rides/:bookingId/details" element={
+          <Route path="rides/details/:bookingId" element={
             <ProtectedRoutes>
               <PassengerRideDetails />
             </ProtectedRoutes>
@@ -83,13 +84,21 @@ function App() {
             </ProtectedRoutes>
           } />
 
+
+
           <Route path="profile" element={
             <ProtectedRoutes>
               <PassengerProfilePage />
             </ProtectedRoutes>
           } />
 
-          <Route path="rides/:bookingId" element={
+          <Route path="settings" element={
+            <ProtectedRoutes>
+              <Settings />
+            </ProtectedRoutes>
+          } />
+
+          <Route path="rides/active/:bookingId" element={
             <ProtectedRoutes>
               <ActiveRide />
             </ProtectedRoutes>

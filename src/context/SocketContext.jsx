@@ -53,7 +53,7 @@ export const SocketProvider = ({ children }) => {
               <>
                 Redirecting you to ride details.{" "}
                 <Link
-                  to={`/rides/${msg.bookingId}`}
+                  to={`/rides/active/${msg.bookingId}`}
                   className="text-yellow-400 underline hover:text-yellow-300"
                 >
                   View Ride Details
@@ -64,7 +64,7 @@ export const SocketProvider = ({ children }) => {
           });
 
           // update booking store and navigate to new ride
-          navigate(`/rides/${msg.bookingId}`);
+          navigate(`/rides/active/${msg.bookingId}`);
           useBookingStore.getState().setActiveBooking({
             bookingId: msg.bookingId,
             bookingStatus: msg.status || "ASSIGNED",

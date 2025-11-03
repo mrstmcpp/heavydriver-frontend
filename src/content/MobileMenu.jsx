@@ -83,7 +83,7 @@ const MobileMenu = ({
                       key={subIdx}
                       label={sub.label}
                       icon={sub.icon}
-                      className="w-full justify-start text-left bg-yellow-400 hover:bg-gray-700 border-none text-gray-200 py-3 rounded-lg"
+                      className="w-full justify-start text-left !bg-yellow-400 hover:bg-gray-700 !border-none text-gray-200 py-3 rounded-lg"
                       onClick={() => {
                         sub.command();
                         setVisible(false);
@@ -95,7 +95,7 @@ const MobileMenu = ({
                 <Button
                   label={item.label}
                   icon={item.icon}
-                  className="w-full justify-start text-left bg-yellow-400 hover:bg-gray-700 border-none text-gray-200 py-3 rounded-lg"
+                  className="w-full justify-start text-left !bg-yellow-400 hover:bg-gray-700 !border-none text-gray-200 py-3 rounded-lg"
                   onClick={() => {
                     item.command();
                     setVisible(false);
@@ -111,7 +111,7 @@ const MobileMenu = ({
           <Button
             label="Engineering"
             icon="pi pi-cog"
-            className="w-full font-semibold text-black bg-sky-400 hover:bg-sky-300 py-3 rounded-full border-none"
+            className="w-full font-semibold text-black !bg-sky-400 hover:bg-sky-300 py-3 rounded-full !border-none"
             onClick={() => {
               navigate("/engineering");
               setVisible(false);
@@ -119,12 +119,12 @@ const MobileMenu = ({
           />
           <Button
             label={activeBooking ? "Ongoing Ride" : "Book a Ride"}
-            icon={activeBooking ? "pi pi-map-marker" : "pi pi-send"}
-            className="w-full font-semibold text-black bg-yellow-400 hover:bg-yellow-300 py-3 rounded-full border-none"
+            icon={activeBooking ? "pi pi-map-marker" : "pi pi-car"}
+            className="w-full font-semibold text-black !bg-yellow-400 hover:bg-yellow-300 py-3 rounded-full !border-none"
             onClick={() => {
               navigate(
                 activeBooking
-                  ? `/rides/${activeBooking.bookingId}`
+                  ? `/rides/active/${activeBooking.bookingId}`
                   : "/rides/new"
               );
               setVisible(false);
@@ -134,7 +134,7 @@ const MobileMenu = ({
             <Button
               label="Logout"
               icon="pi pi-sign-out"
-              className="w-full font-semibold text-white bg-red-500 hover:bg-red-600 py-3 rounded-full border-none"
+              className="w-full font-semibold text-white !bg-red-500 hover:bg-red-600 py-3 rounded-full !border-none"
               onClick={() => {
                 onLogout();
                 setVisible(false);

@@ -52,7 +52,7 @@ const DesktopMenu = ({ navigate, authUser, onLogout }) => {
               border: "none",
               boxShadow: "0 0 10px rgba(34,197,94,0.4)",
             }}
-            onClick={() => navigate(`/rides/${activeBooking.bookingId}`)}
+            onClick={() => navigate(`/rides/active/${activeBooking.bookingId}`)}
           />
         ) : (
           <Button
