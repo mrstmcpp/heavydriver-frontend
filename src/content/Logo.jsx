@@ -5,11 +5,12 @@ const Logo = ({ onClick }) => (
     className="flex items-center gap-2 cursor-pointer"
     onClick={onClick}
   >
-    <img
+    {/* <img
       src="/banner_logo_trans.png"
       alt="Heavy Driver Logo"
       className="h-10 drop-shadow-md"
-    />
+    /> */}
+      <div className="text-2xl font-extrabold">HeavyDriver</div>
   </div>
 );
 

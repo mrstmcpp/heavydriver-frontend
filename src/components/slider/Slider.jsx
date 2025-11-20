@@ -1,43 +1,60 @@
 import React, { useState, useEffect, useRef } from "react";
 import "./slider.css";
 
+import car1 from "../../assets/svgs/car1.svg";
+import car2 from "../../assets/svgs/car2.svg";
+import car3 from "../../assets/svgs/car3.svg";
+import electricCar from "../../assets/svgs/electricCar.svg";
+
+
 const initialImages = [
   {
-    url: "https://images.unsplash.com/photo-1552519507-da3b142c6e3d?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    title: "DriveEase",
-    description: "Book your next ride in seconds. <br /> Safe. Fast. Reliable.",
-    rideInfo: {
-      type: "Sports Car",
-      time: "On Demand",
-      fare: "₹400 - ₹750",
+    url: car1,
+    text: {
+      highlight: "Ride Booking Made Easy",
+      headline: "Book a Ride in Seconds.",
+      subtext:
+        "Your everyday travel simplified with a smooth and fast booking flow.",
+      cta: {
+        label: "Book Now",
+        link: "/rides/new",
+      },
     },
   },
   {
-    url: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e6/Lykan_HyperSport.jpg/960px-Lykan_HyperSport.jpg",
-    title: "Night Owl",
-    description: "Your ride is available 24/7. <br /> Travel anytime, anywhere.",
-    rideInfo: {
-      type: "Sedan",
-      time: "Instant",
-      fare: "₹120 - ₹250",
+    url: car2,
+    text: {
+      highlight: "Faster Driver Matching",
+      headline: "Get a Driver Instantly.",
+      subtext: "Near real-time matching with drivers closest to your pickup.",
+      cta: {
+        label: "Learn More",
+        link: "https://heavydriver.app/engineering",
+      }, // No button here
     },
   },
   {
-    url: "https://caronphone.com/_next/image?url=https%3A%2F%2Fstatic.caronphone.com%2Fpublic%2Fbrands%2F24%2F278%2F278.webp&w=3840&q=75",
-    title: "City Cruiser",
-    description: "Navigate the city with comfort. <br /> Professional drivers, premium service.",
-    rideInfo: {
-      type: "SUV",
-      time: "Scheduled",
-      fare: "₹200 - ₹400",
+    url: car3,
+    text: {
+      highlight: "Low Cost Rides",
+      headline: "Affordable Pricing for Everyone.",
+      subtext: "Transparent fare system with no hidden charges.",
+      cta: null, // No button here
+    },
+  },
+  {
+    url: electricCar,
+    text: {
+      highlight: "Eco-Friendly EV Rides",
+      headline: "Move Smart. Move Green.",
+      subtext: "Enjoy comfortable rides with our all-electric fleet.",
+      cta: null,
     },
   },
 ];
 
 const Slider = () => {
   const [slides, setSlides] = useState(initialImages);
-  
-  // NEW: Use a ref to hold the interval ID
   const intervalRef = useRef(null);
 
   const handleNext = () => {
@@ -50,74 +67,48 @@ const Slider = () => {
       ...prevSlides.slice(0, prevSlides.length - 1),
     ]);
   };
-  
-  // NEW: useEffect hook to manage the interval for auto-sliding
+
   useEffect(() => {
-    // Start the interval when the component mounts
     intervalRef.current = setInterval(() => {
       handleNext();
-    }, 5000); // Change slide every 5 seconds (5000ms)
+    }, 7000);
 
-    // Clear the interval when the component unmounts to prevent memory leaks
     return () => clearInterval(intervalRef.current);
-  }, []); // The empty dependency array ensures this runs only once on mount
+  }, []);
 
-  // NEW: Functions to pause and resume the slider on hover
-  const pauseAutoSlide = () => {
-    clearInterval(intervalRef.current);
-  };
-  
-  const resumeAutoSlide = () => {
-    intervalRef.current = setInterval(() => {
-      handleNext();
-    }, 5000);
-  };
+  const pauseAutoSlide = () => clearInterval(intervalRef.current);
+  const resumeAutoSlide = () =>
+    (intervalRef.current = setInterval(() => handleNext(), 7000));
 
   return (
-    // NEW: Added onMouseEnter and onMouseLeave to the main container
-    <div 
-      className="slider-container" 
-      onMouseEnter={pauseAutoSlide} 
+    <div
+      className="slider-container"
+      onMouseEnter={pauseAutoSlide}
       onMouseLeave={resumeAutoSlide}
     >
       <div id="slide">
         {slides.map((slide) => (
-          <div
-            className="item"
-            key={slide.url}
-            style={{ backgroundImage: `url(${slide.url})` }}
-          >
+          <div className="item" key={slide.url}>
             <div className="content-overlay">
               <div className="content">
-                <div className="left">
-                  <h1 className="title">{slide.title}</h1>
-                  <div
-                    className="des"
-                    dangerouslySetInnerHTML={{ __html: slide.description }}
-                  />
-                  <button>
-                    Learn More
-                    <i className="fa-solid fa-angle-right ml-2"></i>
-                    <i className="fa-solid fa-angle-right"></i>
-                    <i className="fa-solid fa-angle-right"></i>
-                  </button>
+                {/* LEFT — Ride Info (glass panel) */}
+                <div className="left slide-text">
+                  <p className="slide-highlight">{slide.text.highlight}</p>
+
+                  <h2 className="slide-headline">{slide.text.headline}</h2>
+
+                  <p className="slide-subtext">{slide.text.subtext}</p>
+
+                  {slide.text.cta && (
+                    <a href={slide.text.cta.link} className="slide-cta">
+                      {slide.text.cta.label}
+                    </a>
+                  )}
                 </div>
+
+                {/* RIGHT — SVG */}
                 <div className="right">
-                  <h2>Ride Info</h2>
-                  <ul>
-                    <li>
-                      <p>Vehicle Type</p>
-                      <p>{slide.rideInfo.type}</p>
-                    </li>
-                    <li>
-                      <p>Booking Time</p>
-                      <p>{slide.rideInfo.time}</p>
-                    </li>
-                    <li>
-                      <p>Fare Estimation</p>
-                      <p>{slide.rideInfo.fare}</p>
-                    </li>
-                  </ul>
+                  <img src={slide.url} className="slide-svg text-center" />
                 </div>
               </div>
             </div>
@@ -125,10 +116,12 @@ const Slider = () => {
         ))}
       </div>
 
+      {/* Arrows */}
       <div className="directional">
         <button onClick={handlePrev}>
           <i className="fa-solid fa-angle-left"></i>
         </button>
+
         <button onClick={handleNext}>
           <i className="fa-solid fa-angle-right"></i>
         </button>
