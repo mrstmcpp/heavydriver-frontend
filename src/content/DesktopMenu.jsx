@@ -38,7 +38,9 @@ const DesktopMenu = ({ navigate, authUser, onLogout }) => {
             border: "none",
             boxShadow: "0 0 10px rgba(56,189,248,0.5)",
           }}
-          onClick={() => navigate("/engineering")}
+          onClick={() =>
+            window.open("https://heavydriver.app/engineering", "_blank")
+          }
         />
 
         {activeBooking ? (
@@ -69,7 +71,13 @@ const DesktopMenu = ({ navigate, authUser, onLogout }) => {
           />
         )}
 
-        {authUser && <ProfileMenu authUser={authUser} onLogout={onLogout} navigate={navigate} />}
+        {authUser && (
+          <ProfileMenu
+            authUser={authUser}
+            onLogout={onLogout}
+            navigate={navigate}
+          />
+        )}
       </div>
     </>
   );

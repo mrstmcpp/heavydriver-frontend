@@ -1,21 +1,14 @@
-import React, {useState} from "react";
+import React, { useState } from "react";
 import { Dialog } from "primereact/dialog";
 import { Button } from "primereact/button";
 import { getMenuItems } from "./MenuItems";
 import ProfileMenu from "./ProfileMenu";
 import useBookingStore from "../hooks/useBookingStore";
 
-const MobileMenu = ({
-  visible,
-  setVisible,
-  navigate,
-  authUser,
-  onLogout,
-}) => {
+const MobileMenu = ({ visible, setVisible, navigate, authUser, onLogout }) => {
   const [profileVisible, setProfileVisible] = useState(false);
   const menuItems = getMenuItems(navigate);
   const activeBooking = useBookingStore((state) => state.activeBooking);
-
 
   return (
     <Dialog
@@ -111,11 +104,16 @@ const MobileMenu = ({
           <Button
             label="Engineering"
             icon="pi pi-cog"
-            className="w-full font-semibold text-black !bg-sky-400 hover:bg-sky-300 py-3 rounded-full !border-none"
-            onClick={() => {
-              navigate("/engineering");
-              setVisible(false);
+            className="p-button-sm p-button-rounded font-semibold"
+            style={{
+              background: "#38bdf8",
+              color: "#000",
+              border: "none",
+              boxShadow: "0 0 10px rgba(56,189,248,0.5)",
             }}
+            onClick={() =>
+              window.open("https://heavydriver.app/engineering", "_blank")
+            }
           />
           <Button
             label={activeBooking ? "Ongoing Ride" : "Book a Ride"}

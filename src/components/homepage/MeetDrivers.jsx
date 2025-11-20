@@ -1,29 +1,28 @@
 import React from "react";
 import { motion } from "framer-motion";
-import YellowButton from "../../resusables/YellowButton";
-
+import man2 from "../../assets/user.png"
 const drivers = [
   {
     name: "Rajesh Kumar",
-    role: "Luxury Ride Specialist",
-    bio: "Over 12 years of experience in providing premium rides with utmost comfort and safety.",
-    image: "/drivers/driver.png",
-    profileUrl: "#"
+    rating: 4.9,
+    bio: "Bringing over 12 years of premium driving experience with a strong focus on comfort and safety.",
+    image: man2,
+    profileUrl: "#",
   },
   {
     name: "Priya Sharma",
-    role: "City Ride Expert",
-    bio: "Specializes in quick and efficient city travel, ensuring timely pickups and drop-offs.",
-    image: "/drivers/driver.png",
-    profileUrl: "#"
+    rating: 4.7,
+    bio: "Specialized in fast and efficient city rides, ensuring timely pickups and smooth travel.",
+    image: man2,
+    profileUrl: "#",
   },
   {
     name: "Amit Verma",
-    role: "Outstation Ride Pro",
-    bio: "Experienced in long-distance routes with a focus on comfort and reliability.",
-    image: "/drivers/driver.png",
-    profileUrl: "#"
-  }
+    rating: 4.8,
+    bio: "Skilled in long-distance outstation routes with a commitment to comfort and reliability.",
+    image: man2,
+    profileUrl: "#",
+  },
 ];
 
 export default function DriverCards() {
@@ -37,10 +36,11 @@ export default function DriverCards() {
         transition={{ duration: 0.6 }}
       >
         <h2 className="text-4xl font-bold text-white">
-          Our <span className="text-yellow-400">Drivers</span>
+          Meet Our <span className="text-yellow-400">Drivers</span>
         </h2>
         <p className="text-gray-400 mt-2 text-sm sm:text-base max-w-2xl mx-auto">
-          Meet our professional and friendly drivers who ensure every journey is safe, comfortable, and memorable.
+          Skilled, verified, and dedicated — our drivers bring expertise and
+          professionalism to every ride.
         </p>
       </motion.div>
 
@@ -77,21 +77,14 @@ export default function DriverCards() {
               >
                 {driver.name}
               </motion.h3>
-              <p className="text-yellow-400 text-sm text-center mb-4">
-                {driver.role}
-              </p>
+              <div className="text-yellow-400 text-sm text-center mb-4 flex items-center justify-center gap-1">
+                <span className="text-base font-semibold">{driver.rating}</span>
+                <span className="text-yellow-400">★</span>
+              </div>
 
               <p className="text-gray-400 text-sm mb-6 text-center flex-grow">
                 {driver.bio}
               </p>
-
-              {/* Fixed Button Position */}
-              <div className="flex justify-center mt-auto">
-                <YellowButton
-                  children="View Profile"
-                  onClick={() => (window.location.href = driver.profileUrl)}
-                />
-              </div>
             </div>
           </motion.div>
         ))}

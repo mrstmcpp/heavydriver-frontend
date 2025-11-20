@@ -11,7 +11,7 @@ export const getMenuItems = (navigate) => [
       {
         label: 'Engineering',
         icon: 'pi pi-cog',
-        command: () => navigate('/engineering')
+        command: () => window.open("https://heavydriver.app/engineering", "_blank")
       },
       {
         label: 'FAQ',

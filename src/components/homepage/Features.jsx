@@ -23,26 +23,28 @@ const features = [
     image: "/booking.jpg",
   },
   {
-    title: "Address Pickup",
+    title: "Multiple Vehicle Support",
     description:
-      "We pick you up right from your doorstep with safe and timely service.",
-    image: "/pickup.png",
+      "Choose from a variety of EV models—from compact to premium—based on your comfort and travel needs.",
+    image: "/multiple-vehicles.webp",
   },
   {
-    title: "Go Green",
-    description: "Eco-friendly rides with minimal carbon footprint.",
+    title: "Electric Vehicles Only",
+    description:
+      "Ride sustainably with our 100% electric fleet designed for cleaner transportation.",
     image: "/go-green.jpg",
   },
 ];
 
+
 const Features = () => {
   return (
-    <div className="bg-black text-white py-16 px-4">
+    <div className="bg-[#0f0f0f] text-white py-16 px-4">
       <div className="text-center mb-12">
         <h4 className="text-yellow-400 tracking-widest text-sm font-medium">
-          TAXI SERVICE
+          RIDE SERVICE
         </h4>
-        <h2 className="text-4xl font-bold mt-2">Best Taxi Service For You</h2>
+        <h2 className="text-4xl font-bold mt-2">Best Ride Booking Service For You</h2>
       </div>
 
       <div className="max-w-6xl mx-auto grid md:grid-cols-3 gap-10">

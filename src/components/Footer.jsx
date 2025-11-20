@@ -1,4 +1,3 @@
-
 import YellowButton from "../resusables/YellowButton";
 
 const Footer = () => {
@@ -17,13 +16,12 @@ const Footer = () => {
             Information
           </h4>
 
-            <img src="/large_logo.png" alt="Logo" className="h-40 m-2 " />
-            <div className="text-sm text-gray-300">
-              HeavyDriver is a modern ride-hailing platform by Mr Stm,
-              built with scalable microservices, real-time tracking, and secure
-              communication—offering seamless transport for drivers and riders.
-            </div>
-
+          <img src="/large_logo.png" alt="Logo" className="h-40 m-2 " />
+          <div className="text-sm text-gray-300">
+            HeavyDriver is a modern ride-hailing platform by Mr Stm, built with
+            scalable microservices, real-time tracking, and secure
+            communication—offering seamless transport for drivers and riders.
+          </div>
         </div>
 
         {/* Contact Info */}
@@ -44,35 +42,106 @@ const Footer = () => {
               <div className="bg-yellow-400 text-black p-2 rounded-sm">
                 <i className="pi pi-phone text-lg" />
               </div>
-              <span>+91 00000 00000</span>{" "}
+              <span>+91 94525 49006</span>{" "}
               {/* Replace with your real/contact number if you'd like */}
             </div>
             <div className="flex items-start gap-3">
               <div className="bg-yellow-400 text-black p-2 rounded-sm">
                 <i className="pi pi-envelope text-lg" />
               </div>
-              <span>mrstmmusic@gmail.com</span> {/* Replace with your email */}
+              <span>satyamprajapati2k3@gmail.com</span>{" "}
+              {/* Replace with your email */}
             </div>
           </div>
         </div>
 
-        {/* Newsletter */}
+        {/* Social Links */}
         <div>
           <h4 className="text-lg font-bold uppercase tracking-wide mb-2 border-b-2 border-yellow-400 w-max">
-            Newsletter
+            Connect With Me
           </h4>
+
           <p className="text-sm text-gray-300 mb-4">
-            Signup for our weekly newsletter or updates.
+            Follow my work, updates, music, and tech content.
           </p>
-          <div className="flex flex-col sm:flex-row items-stretch gap-3">
-            <input
-              type="email"
-              placeholder="Enter your email"
-              className="w-full px-4 py-2 border border-gray-600 bg-black text-white placeholder-gray-400 outline-none"
-            />
-            <YellowButton onClick={() => console.log("Subscribed!")}>
-              Subscribe
-            </YellowButton>
+
+          <div className="flex flex-col gap-3 text-sm text-gray-300">
+            {/* Portfolio */}
+            <a
+              href="https://mrstm.vercel.app"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-3 hover:text-yellow-400 transition"
+            >
+              <i className="pi pi-globe text-yellow-400 text-lg"></i>
+              Portfolio
+            </a>
+
+            {/* GitHub */}
+            <a
+              href="https://github.com/mrstmcpp"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-3 hover:text-yellow-400 transition"
+            >
+              <i className="pi pi-github text-yellow-400 text-lg"></i>
+              GitHub
+            </a>
+
+            {/* LinkedIn */}
+            <a
+              href="https://linkedin.com/in/mrstmcpp"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-3 hover:text-yellow-400 transition"
+            >
+              <i className="pi pi-linkedin text-yellow-400 text-lg"></i>
+              LinkedIn
+            </a>
+
+            {/* Medium */}
+            <a
+              href="https://medium.com/@mrstmcpp"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-3 hover:text-yellow-400 transition"
+            >
+              <i className="pi pi-clipboard text-yellow-400 text-lg"></i>
+              Medium
+            </a>
+
+            {/* YouTube */}
+            <a
+              href="https://youtube.com/@mrstm_music"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-3 hover:text-yellow-400 transition"
+            >
+              <i className="pi pi-youtube text-yellow-400 text-lg"></i>
+              YouTube
+            </a>
+
+            {/* Music Page */}
+            <a
+              href="https://push.fm/fl/w1nzo0xy"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-3 hover:text-yellow-400 transition"
+            >
+              <i className="pi pi-headphones text-yellow-400 text-lg"></i>
+              Music Page
+            </a>
+
+            {/* Instagram */}
+            <a
+              href="https://instagram.com/mrstmcpp"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-3 hover:text-yellow-400 transition"
+            >
+              <i className="pi pi-instagram text-yellow-400 text-lg"></i>
+              Instagram
+            </a>
           </div>
         </div>
       </div>
@@ -81,12 +150,12 @@ const Footer = () => {
       <div className="relative z-10 max-w-6xl mx-auto px-4 py-4 border-t border-gray-700 text-xs text-gray-400">
         <div className="max-w-screen-2xl mx-auto flex flex-col md:flex-row justify-between items-center">
           <p className="mb-2 md:mb-0">
-            © Copyright Mr Stm Inc. All rights reserved.
+            © Copyright HeavyDriver Inc. All rights reserved.
           </p>
           <div className="flex gap-2">
             Made By :
-            <a href="https://github.com/mrstmcpp" className="hover:text-white">
-              Mr Stm
+            <a href="https://mrstm.vercel.app" className="hover:text-white">
+              Satyam Prajapati
             </a>
           </div>
         </div>
