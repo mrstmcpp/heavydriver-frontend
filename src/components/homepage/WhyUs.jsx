@@ -1,5 +1,6 @@
 import OutlinedButton from "../../resusables/OutlinedButton";
 import evCar from "../../assets/svgs/ev.svg"
+import { Link } from "react-router-dom";
 
 const WhyRideWithUs = () => {
   return (
@@ -18,7 +19,7 @@ const WhyRideWithUs = () => {
             secure rides, and a premium EV-first experience.
           </p>
 
-          <OutlinedButton>Explore Services</OutlinedButton>
+          <OutlinedButton><Link to={"/rides/new"}>Explore Services</Link></OutlinedButton>
         </div>
 
         {/* Right Section: EV Image + Feature Cards */}

@@ -10,7 +10,7 @@ const RatingDialog = ({
   bookingId,
   submitUrl = `${
     import.meta.env.VITE_REVIEW_BACKEND_URL
-  }/review/booking/${bookingId}`,
+  }/booking/${bookingId}`,
 }) => {
   const [ratingValue, setRatingValue] = useState(null);
   const [content, setContent] = useState("");

@@ -1,5 +1,6 @@
 import React from "react";
 import { motion } from "motion/react";
+import { Link } from "react-router-dom";
 
 const cardVariants = {
   initial: { opacity: 0, transform: "translateY(40px)" },

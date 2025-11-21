@@ -10,7 +10,7 @@ const Logo = ({ onClick }) => (
       alt="Heavy Driver Logo"
       className="h-10 drop-shadow-md"
     /> */}
-      <div className="text-2xl font-extrabold">HeavyDriver</div>
+      <div className="text-3xl font-extrabold">HEAVY<span className="text-yellow-400">DRIVER</span></div>
   </div>
 );
 

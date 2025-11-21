@@ -103,7 +103,7 @@ const MobileMenu = ({ visible, setVisible, navigate, authUser, onLogout }) => {
         <div className="flex flex-col gap-3 mt-4">
           <Button
             label="Engineering"
-            icon="pi pi-cog"
+            icon="pi pi-cog animate-spin"
             className="p-button-sm p-button-rounded font-semibold"
             style={{
               background: "#38bdf8",

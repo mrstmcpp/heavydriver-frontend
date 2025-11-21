@@ -34,9 +34,7 @@ const PassengerRides = () => {
     setBookingsLoading(true);
     try {
       const response = await axios.get(
-        `${import.meta.env.VITE_BOOKING_BACKEND_URL}/passenger/${
-          authUser.userId
-        }/all-booking?offset=${pageNumber}&pageSize=${pageSize}`,
+        `${import.meta.env.VITE_BOOKING_BACKEND_URL}/passenger/all-booking?offset=${pageNumber}&pageSize=${pageSize}`,
         {
           withCredentials: true,
           

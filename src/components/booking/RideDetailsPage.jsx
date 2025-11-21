@@ -42,7 +42,7 @@ const PassengerRideDetails = () => {
         if (res.data.bookingStatus === "COMPLETED") {
           try {
             const reviewRes = await axios.get(
-              `${import.meta.env.VITE_REVIEW_BACKEND_URL}/review/booking/${bookingId}`,
+              `${import.meta.env.VITE_REVIEW_BACKEND_URL}/booking/${bookingId}`,
               { withCredentials: true }
             );
             setReview(reviewRes.data);

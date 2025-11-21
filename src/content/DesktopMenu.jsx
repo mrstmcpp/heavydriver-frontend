@@ -30,7 +30,7 @@ const DesktopMenu = ({ navigate, authUser, onLogout }) => {
       <div className="hidden md:flex items-center gap-3">
         <Button
           label="Engineering"
-          icon="pi pi-cog"
+          icon="pi pi-cog animate-spin"
           className="p-button-sm p-button-rounded font-semibold"
           style={{
             background: "#38bdf8",

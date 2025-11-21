@@ -17,6 +17,7 @@ const Footer = () => {
           </h4>
 
           <img src="/large_logo.png" alt="Logo" className="h-40 m-2 " />
+
           <div className="text-sm text-gray-300">
             HeavyDriver is a modern ride-hailing platform by Mr Stm, built with
             scalable microservices, real-time tracking, and secure
@@ -49,7 +50,7 @@ const Footer = () => {
               <div className="bg-yellow-400 text-black p-2 rounded-sm">
                 <i className="pi pi-envelope text-lg" />
               </div>
-              <span>satyamprajapati2k3@gmail.com</span>{" "}
+              <span>support@heavydriver.app</span>{" "}
               {/* Replace with your email */}
             </div>
           </div>

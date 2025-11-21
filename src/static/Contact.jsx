@@ -99,8 +99,7 @@ const Contact = () => {
             <h5 className="uppercase text-yellow-400 tracking-widest mb-2">Need any help?</h5>
             <h2 className="text-4xl font-bold mb-6 font-serif">Get in touch with us</h2>
             <p className="text-gray-400 mb-10">
-              Lorem ipsum is simply free text available dolor sit amet consectetur notted
-              adipisicing elit sed do eiusmod tempor incididunt simply dolore magna.
+              We’ll get back to you within 12–24 hours.
             </p>
 
             <div className="space-y-6">
@@ -110,7 +109,7 @@ const Contact = () => {
                 </div>
                 <div>
                   <h4 className="font-semibold">Have any question?</h4>
-                  <p className="text-gray-300">Free +91 000000000</p>
+                  <p className="text-gray-300">Free +91 94525 49006</p>
                 </div>
               </div>
 
@@ -120,7 +119,7 @@ const Contact = () => {
                 </div>
                 <div>
                   <h4 className="font-semibold">Write email</h4>
-                  <p className="text-gray-300">satyamprajapati2k3@gmail.com</p>
+                  <p className="text-gray-300">support@heavydriver.app</p>
                 </div>
               </div>
 
